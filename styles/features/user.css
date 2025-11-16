@@ -1,0 +1,178 @@
+.login-page, .signup-page {
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+}
+
+.login-page {
+   align-self: flex-start;
+}
+
+.login-title {
+   margin-top: 150px;
+}
+
+.login-title, .signup-title, .password-edit-title, .profile-edit-title {
+   font-size: 32px;
+   font-weight: 700;
+}
+
+.login-form, .signup-form, .password-edit-form, .profile-edit-form {
+   width: 355px;
+   margin-top: 30px;
+
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   gap: 18px;
+}
+
+.profile-edit-form {
+   margin-top: 0px;
+}
+
+.login-form  input {
+   
+   width: 355px;
+   height: 33px;
+   border: 1px solid var(--color-black);
+   border-radius: 4px;
+   padding: 3px 10px;
+
+   color: var(--color-black);
+}
+
+.signup-button, .login-button {
+   width: 100%;
+
+   margin-top: 20px;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   text-align: center;
+
+   font-size: 14px;
+}
+
+.signup-image, .profile-image {
+   width: 100%;
+}
+
+.image-upload-wrapper {
+   display: flex;
+   flex-direction: column;
+   width: 100%;
+   gap: 10px;
+}
+
+.image-upload-title {
+   font-size: 15px;
+   font-weight: 600;
+}
+
+.custom-image-input {
+   width: 149px;
+   height: 149px;
+   border-radius: 50%;
+   background-color: var(--color-gray);
+   color: var(--color-black);
+   font-size: 50px;
+
+   align-self: center;
+
+   display: flex;
+   justify-content: center;
+   align-items: center;
+
+   text-align: center;
+   line-height: 1;
+
+   background-size: cover;       
+   background-position: center; 
+   background-repeat: no-repeat;
+}
+
+.password-edit-page, .profile-edit-page {
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+   align-self: flex-start;
+}
+
+.password-edit-title, .profile-edit-title {
+   margin: 80px 0 50px 0;
+}
+
+.edit-complete-message {
+   width: 102px;
+   height: 46px;
+   border-radius: 30px;
+   margin-top: 30px;
+
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   align-self: center;
+
+   background-color: var(--color-purple-light);
+   color: var(--color-white);
+   box-shadow:
+      0 1px   3px  rgba(0,0,0,.12), 
+      0 6px  12px rgba(0,0,0,.10), 
+      0 12px 24px rgba(0,0,0,.08);
+
+   opacity: 0;
+   transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.edit-complete-message.is-visible {
+   opacity: 1;
+}
+
+.profile-edit-email {
+   width: 355px;
+
+   display: flex;
+   flex-direction: column;
+   gap: 15px;
+}
+
+.label-email {
+   font-size: 15px;
+   font-weight: 600;
+}
+
+.current-email {
+   font-size: 14px;
+   font-weight: 400;
+}
+
+.profile-edit-form .custom-image-input-text {
+   width: 52px;
+   height: 27px;
+   border-radius: 25px;
+   border: 1px solid var(--color-white);
+
+   display: flex;
+   justify-content: center;
+   align-items: center;
+
+}
+
+.profile-edit-form .custom-image-input {
+   color: var(--color-white);
+   font-size: 14px;
+}
+
+.profile-edit-form .custom-image-input-text:empty {
+   display: none;
+}
+
+.withdraw-text {
+   margin-top: 15px;
+   text-align: center;
+   font-size: 15px;
+   font-weight: 400;
+}
