@@ -77,5 +77,17 @@ export default function Router(app) {
 
    window.addEventListener('popstate', render);
 
+   document.addEventListener('click', (e) => {
+      const $routeTarget = e.target.closest('[data-route]');
+      if (!$routeTarget) return;
+
+      e.preventDefault();
+
+      const path = $routeTarget.getAttribute('data-route');
+      if (!path) return;
+
+      navigate(path);
+   });
+
    return { render, navigate };
 }
