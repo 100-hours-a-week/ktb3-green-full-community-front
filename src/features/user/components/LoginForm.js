@@ -1,5 +1,4 @@
 import Component from '../../../core/Component.js';
-import { createInputWrapper } from '../../../shared/components/formInput.js';
 import { apiFetch, setAccessToken, setRefreshToken, setAuthUser } from '../../../lib/api.js';
 import CustomInput from '../../../shared/components/CustomInput.js';
 import { isValidEmail, isValidPassword } from '../../../lib/auth.js';

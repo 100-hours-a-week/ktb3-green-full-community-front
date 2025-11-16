@@ -1,7 +1,5 @@
 import Component from '../../../core/Component.js';
-import { createInputWrapper } from '../../../shared/components/formInput.js';
 import { apiFetch } from '../../../lib/api.js';
-import CustomInput from '../../../shared/components/CustomInput.js';
 
 export default class PostForm extends Component {
    
