@@ -1,0 +1,59 @@
+@font-face {
+    font-family: "Pretendard";
+    src: url("/public/fonts/Pretendard-Light.woff2") format("woff2");
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Pretendard";
+    src: url("/public/fonts/Pretendard-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Pretendard";
+    src: url("/public/fonts/Pretendard-Medium.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Pretendard";
+    src: url("/public/fonts/Pretendard-SemiBold.woff2") format("woff2");
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Pretendard";
+    src: url("/public/fonts/Pretendard-Bold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Pretendard";
+    src: url("/public/fonts/Pretendard-ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Pretendard";
+    src: url("/public/fonts/Pretendard-Black.woff2") format("woff2");
+    font-weight: 900;
+    font-style: normal;
+}
+
+:root {
+    --color-red: #FF0000;
+    --color-purple-light: #ACA0EB;
+    --color-purple-bright: #7F6AEE;
+    --color-gray-light: #F4F5F7;
+    --color-gray: #D9D9D9;
+    --color-gray-dark: #E9E9E9;
+    --color-black: #000000;
+    --color-white: #FFFFFF;
+}
