@@ -59,7 +59,7 @@ export default class PostItem extends Component {
 
       const $authorProfile = document.createElement('div');
       $authorProfile.className = 'post-author-profile';
-      $authorProfile.style.backgroundImage = userId === 53 ? 'url(/img/profile_img_dog.JPG)' : 'url(/img/profile_img_mandoo.PNG)'; //추후 수정 필요
+      $authorProfile.style.backgroundImage = userId === 60 ? 'url(/img/profile_img_ham.JPG)' : 'url(/img/profile_img_pms.JPG)'; //추후 수정 필요
       const $authorNickname = document.createElement('div');
       $authorNickname.className = 'post-author-nickname';
       $authorNickname.textContent = nickname;

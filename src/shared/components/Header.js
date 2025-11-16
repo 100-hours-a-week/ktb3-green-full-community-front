@@ -29,7 +29,7 @@ export default class Header extends Component {
       if(isLoggedIn) {
          const $profileImg = document.createElement('img');
          $profileImg.className = 'header-profile-img';
-         $profileImg.src = isLoggedIn ? "../../img/profile_img_pms.JPG" : ''; //추후 구현 필요
+         $profileImg.src = isLoggedIn ? "../../img/profile_img_ham.JPG" : ''; //추후 구현 필요
          $profile.appendChild($profileImg);
       }
       if (isBack) {

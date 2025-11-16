@@ -32,6 +32,7 @@ export default class CommentItem extends Component {
 
       const $profileImg = document.createElement('div');
       $profileImg.className = 'author-profile-img';
+      $profileImg.style.backgroundImage = isOwner ? 'url(/img/profile_img_ham.JPG)' : 'url(/img/profile_img_pms.JPG)'; //추후 수정 필요
       const $nickname = document.createElement('div');
       $nickname.className = 'author-profile-nickname';
       $nickname.textContent = nickname;

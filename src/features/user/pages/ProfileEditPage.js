@@ -39,13 +39,12 @@ export default class ProfileEditPage extends Component {
          console.log(response);
 
          const userProfile = response.data;
-         const profileImg = localStorage.getItem('profileImg');
 
          const profileEditFormProps = {
             $target: form,
             email: userProfile.email,
             currentNickname: userProfile.nickname,
-            currentProfileImg: profileImg, //추후 수정 필요
+            currentProfileImg: '/img/profile_img_ham.JPG', //추후 수정 필요
          }
 
          const profileForm = new ProfileForm(profileEditFormProps);
