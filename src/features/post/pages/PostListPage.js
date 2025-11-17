@@ -5,7 +5,8 @@ import { apiFetch } from '../../../lib/api.js';
 export default class PostListPage extends Component {
 
    setup() {
-      this.state = { page: 0, size: 5 };
+      this.state = { page: 0, size: 5, isLoading: false, isLast: false };
+      this.observer = null;
    }
 
    template() {
@@ -28,11 +29,14 @@ export default class PostListPage extends Component {
 
       const $postList = document.createElement('div');
       $postList.className = 'post-list-items';
+
+      const $scrollSentinel = document.createElement('div');
+      $scrollSentinel.className = 'post-list-scroll-sentinel';
       
-      $page.append($title, $title2, $button, $postList);
+      $page.append($title, $title2, $button, $postList, $scrollSentinel);
       frag.appendChild($page);
 
-      this.$refs = { postList: $postList, addButton: $button };
+      this.$refs = { postList: $postList, addButton: $button, scrollSentinel: $scrollSentinel };
 
       return frag;
 
@@ -40,8 +44,21 @@ export default class PostListPage extends Component {
 
    async afterMount() {
 
+      await this.loadPostItems();
+      this.initObserver();
+      
+   }
+
+   async loadPostItems() {
+
+      const { page, size, isLoading, isLast } = this.state;
+
+      if(isLoading || isLast ) return;
+      this.state.isLoading = true;
+
       try {
-         const response = await apiFetch('/posts', {
+
+         const response = await apiFetch(`/posts?page=${page}&size=${size}`, {
             method: 'GET',
             withAuth: false
          });
@@ -67,11 +84,42 @@ export default class PostListPage extends Component {
 
          });
 
-         this.$refs.postList.replaceChildren(frag);
+         this.$refs.postList.append(frag);
+
+         this.state.page = page + 1;
+         this.state.isLast = response.data.last;
+
       }
-      catch (error) {
+      catch(error) {
          console.log(error);
       }
+      finally {
+         this.state.isLoading = false;
+      }
+   }
+
+   initObserver() {
+
+      if (!this.$refs.scrollSentinel) return;
+
+      const callback = (entries, observer) => {
+         entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+               this.loadPostItems();
+            }
+            if (this.state.isLast) {
+               observer.unobserve(entry.target);
+            }
+         });
+      }
+
+      const options = {
+         threshold: 1,
+      }
+      
+      this.observer = new IntersectionObserver(callback, options);
+      this.observer.observe(this.$refs.scrollSentinel);
+
    }
 
    setEvent() {
