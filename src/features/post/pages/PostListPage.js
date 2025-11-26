@@ -1,11 +1,12 @@
-import Component from '../../../core/Component.js';
-import PostItem from '../components/PostItem.js';
-import { apiFetch } from '../../../lib/api.js';
+import Component from "../../../core/Component.js";
+import { apiFetch } from "../../../lib/api.js";
+import { getPageState, savePageState } from "../../../localCache.js";
+import HmmItem from "../components/HmmItem.js";
 
 export default class PostListPage extends Component {
 
    setup() {
-      this.state = { page: 0, size: 5, isLoading: false, isLast: false };
+      this.state = { page: 0, size: 4, isLast: false, pages: {}, lastViewedPage: 0, isLoading: false };
       this.observer = null;
    }
 
@@ -16,27 +17,26 @@ export default class PostListPage extends Component {
       const $page = document.createElement('div');
       $page.className = 'post-list-page';
 
+      const $titleWrapper = document.createElement('div');
+      $titleWrapper.className = 'post-list-page-title-wrapper';
+
       const $title = document.createElement('div');
-      $title.className = 'post-list-title';
-      $title.textContent = '안녕하세요,';
-      const $title2 = document.createElement('div');
-      $title2.className = 'post-list-title';
-      $title2.textContent = '아무 말 대잔치 게시판 입니다.';
+      $title.className = 'post-list-page-title';
+      $title.textContent = 'H m m m . .';
 
-      const $button = document.createElement('button');
-      $button.className = 'post-add-button';
-      $button.textContent = '게시글 작성';
+      $titleWrapper.append($title);
 
-      const $postList = document.createElement('div');
-      $postList.className = 'post-list-items';
+      const $list = document.createElement('div');
+      $list.className = 'post-list';
 
       const $scrollSentinel = document.createElement('div');
       $scrollSentinel.className = 'post-list-scroll-sentinel';
-      
-      $page.append($title, $title2, $button, $postList, $scrollSentinel);
-      frag.appendChild($page);
 
-      this.$refs = { postList: $postList, addButton: $button, scrollSentinel: $scrollSentinel };
+      $list.append($scrollSentinel);
+      $page.append($titleWrapper, $list);
+      frag.append($page);
+
+      this.$refs = { list: $list, scrollSentinel: $scrollSentinel };
 
       return frag;
 
@@ -44,14 +44,45 @@ export default class PostListPage extends Component {
 
    async afterMount() {
 
+      const key = window.location.pathname;
+      const cache = getPageState(key);
+
+      if(cache) {
+
+         console.log('cache hit');
+
+         this.state.page = cache.lastFetchedPage ?? 0;
+         this.state.isLast = !!cache.isLast;
+         this.state.pages = cache.pages;
+         this.state.lastViewdPage = cache.lastViewdPage ?? 0;
+
+         Object.values(cache.pages).forEach((posts) => {
+            this.renderPosts(posts);
+         });
+
+         const container = this.$refs.list;
+         const pageWidth = container.clientWidth;
+         const { lastViewedPage } = cache;
+
+         requestAnimationFrame(() => {
+            container.scrollLeft = pageWidth * lastViewedPage;
+         });
+
+         if(!this.state.isLast) this.initObserver();
+         this.initScrollSave();
+
+         return;
+      }
+
       await this.loadPostItems();
       this.initObserver();
+      this.initScrollSave();
       
    }
 
    async loadPostItems() {
 
-      const { page, size, isLoading, isLast } = this.state;
+      const { page, size, isLast, pages, isLoading } = this.state;
 
       if(isLoading || isLast ) return;
       this.state.isLoading = true;
@@ -60,34 +91,29 @@ export default class PostListPage extends Component {
 
          const response = await apiFetch(`/posts?page=${page}&size=${size}`, {
             method: 'GET',
-            withAuth: false
+            withAuth: false,
          });
+
+         console.log('[fetch]', { reqPage: page, size, len: response.data.content?.length, last: response.data.last });
+         console.log('API 호출');
 
          const posts = response.data.content;
-         
-         const frag = document.createDocumentFragment();
+         this.renderPosts(posts);
 
-         posts.forEach((post) => {
-            
-            const props = {
-               postId: post.postId,
-               userId: post.author.userId,
-               profileImg: post.author.profileImg,
-               title: post.title ?? '',
-               nickname: post.author?.nickname ?? '',
-               counts: [post.likes ?? 0, post.comments ?? 0, post.views ?? 0],
-               createdAt: post.createdAt ?? '',
-            };
-
-            const postItem = new PostItem(props).render();
-            frag.appendChild(postItem);
-
-         });
-
-         this.$refs.postList.append(frag);
-
+         const updatedPages = { ...pages, [page]: posts };
+         this.state.pages = updatedPages;
          this.state.page = page + 1;
          this.state.isLast = response.data.last;
+
+         const key = window.location.pathname;
+         const prevCache = getPageState(key) || {};
+
+         savePageState(key, {
+            isLast: this.state.isLast,
+            lastFetchedPage: this.state.page,
+            lastViewedPage: prevCache.lastViewedPage ?? this.state.lastViewedPage ?? 0,
+            pages: updatedPages,
+         });
 
       }
       catch(error) {
@@ -100,11 +126,14 @@ export default class PostListPage extends Component {
 
    initObserver() {
 
-      if (!this.$refs.scrollSentinel) return;
+      const { list, scrollSentinel } = this.$refs;
+
+      if (!scrollSentinel) return;
 
       const callback = (entries, observer) => {
          entries.forEach((entry) => {
             if (entry.isIntersecting) {
+               console.log('API 호출 트리거');
                this.loadPostItems();
             }
             if (this.state.isLast) {
@@ -114,7 +143,9 @@ export default class PostListPage extends Component {
       }
 
       const options = {
-         threshold: 1,
+         root: list, 
+         rootMargin: '0px 200px 0px 0px',          
+         threshold: 0.5,   
       }
       
       this.observer = new IntersectionObserver(callback, options);
@@ -122,16 +153,49 @@ export default class PostListPage extends Component {
 
    }
 
-   setEvent() {
+   renderPosts(posts) {
 
-      const { addButton } = this.$refs;
+      const { list, scrollSentinel } = this.$refs;
 
-      addButton.addEventListener('click', (e) => {
-         e.preventDefault();
+      const $postPage = document.createElement('div');
+      $postPage.className = 'post-items-group';
 
-         window.history.pushState({}, '', '/posts/new');
-         window.dispatchEvent(new PopStateEvent('popstate'));
+      posts.forEach((post) => {
+         const props = {
+         postId: post.postId,
+         userId: post.author.userId,
+         title: post.title,
+         pick1: post.pick1.pickTitle,
+         pick2: post.pick2.pickTitle,
+         pickCount: post.pickCount,
+         nickname: post.author?.nickname ?? '',
+         };
+
+         const postItem = new HmmItem(props).render();
+         $postPage.appendChild(postItem);
+      });
+
+      list.insertBefore($postPage, scrollSentinel);
+
+   }
+
+   initScrollSave() {
+
+      const { list } = this.$refs;
+
+      const key = window.location.pathname;
+
+      list.addEventListener('scroll', () => {
+         const pageWidth = list.clientWidth;
+         const lastViewedPage = Math.round(list.scrollLeft / pageWidth);
+
+         this.state.lastViewedPage = lastViewedPage;
+
+         savePageState(key, {
+            lastViewedPage: lastViewedPage,
+         });
       });
 
    }
+   
 }
