@@ -20,21 +20,34 @@ export default class SignUpForm extends Component {
       const $image = document.createElement('div');
       $image.className = 'signup-image';
       const image = new ImageUploader({ $target: $image });
-      image.setState({ isUploaded: true, imageUrl: '', text: '+' });
+      image.setState({ isUploaded: false, imageUrl: '', text: '업로드' });
+
+      const $emailLabel = document.createElement('div');
+      $emailLabel.className = 'email-label form-input-label';
+      $emailLabel.textContent = '이메일*';
+      const $passwordLabel = document.createElement('div');
+      $passwordLabel.className = 'password-label form-input-label';
+      $passwordLabel.textContent = '비밀번호*';
+      const $checkLabel = document.createElement('div');
+      $checkLabel.className = 'check-label form-input-label';
+      $checkLabel.textContent = '비밀번호 확인*';
+      const $nicknameLabel = document.createElement('div');
+      $nicknameLabel.className = 'nickname-label form-input-label';
+      $nicknameLabel.textContent = '닉네임*';
 
       const $email = document.createElement('div');
-      $email.className = 'signup-form-email';
+      $email.className = 'signup-form-email input';
       const $password = document.createElement('div');
-      $password.className = 'signup-form-password';
+      $password.className = 'signup-form-password input';
       const $passwordCheck = document.createElement('div');
-      $passwordCheck.className = 'signup-form-password-check';
+      $passwordCheck.className = 'signup-form-password-check input';
       const $nickname = document.createElement('div');
-      $nickname.className = 'signup-from-nickname';
+      $nickname.className = 'signup-from-nickname input';
 
-      const email = new CustomInput({ $target: $email, label: '이메일*', name: 'email', type: 'email', placeholder: '이메일을 입력하세요', required: true});
-      const password = new CustomInput({ $target: $password, label: '비밀번호*', name: 'password', type: 'password', placeholder: '비밀번호를 입력하세요', required: true });
-      const passwordCheck = new CustomInput({ $target: $passwordCheck, label: '비밀번호 확인*', name: 'passwordCheck', type: 'password', placeholder: '비밀번호를 한번 더 입력하세요', required: true });
-      const nickname = new CustomInput({ $target: $nickname, label: '닉네임*', name: 'nickname', type: 'text', placeholder: '닉네임을 입력하세요', required: true });
+      const email = new CustomInput({ $target: $email, label: '이메일*', name: 'email', type: 'email', required: true});
+      const password = new CustomInput({ $target: $password, label: '비밀번호*', name: 'password', type: 'password', required: true });
+      const passwordCheck = new CustomInput({ $target: $passwordCheck, label: '비밀번호 확인*', name: 'passwordCheck', type: 'password', required: true });
+      const nickname = new CustomInput({ $target: $nickname, label: '닉네임*', name: 'nickname', type: 'text', required: true });
 
       email.render();
       password.render();
@@ -47,18 +60,18 @@ export default class SignUpForm extends Component {
       $button.text = '수정하기';
       $button.disabled = !this.state.isCompleted;
 
-      $form.append($image, $email, $password, $passwordCheck, $nickname, $button);
+      $form.append($image, $emailLabel, $email, $passwordLabel, $password, $checkLabel, $passwordCheck, $nicknameLabel, $nickname, $button);
       frag.append($form);
 
       this.$refs = { form: $form, email: email, password: password, passwordCheck: passwordCheck, nickname: nickname, button: $button, 
-         emailInput: email.$refs.input, passwordInput: password.$refs.input, passwordCheckInput: passwordCheck.$refs.input, nicknameInput: nickname.$refs.input };      
+         emailInput: email.$refs.input, passwordInput: password.$refs.input, passwordCheckInput: passwordCheck.$refs.input, nicknameInput: nickname.$refs.input, imageInput: image.$refs.input };      
 
       return frag;
    }
 
    setEvent() {
       const { form, email, password, passwordCheck, nickname, button, 
-         emailInput, passwordInput, passwordCheckInput, nicknameInput } = this.$refs;
+         emailInput, passwordInput, passwordCheckInput, nicknameInput, imageInput } = this.$refs;
    
       emailInput.addEventListener('input', () => {
          const input = emailInput.value || '';
@@ -130,18 +143,26 @@ export default class SignUpForm extends Component {
       form.addEventListener('submit', async(e) => {
          e.preventDefault();
 
-         const payload = {
-            email: emailInput.value,
-            password: passwordInput.value,
-            checkPassword: passwordCheckInput.value,
-            nickname: nicknameInput.value,
-            profileImg: 'https://examples.photos/uesrs/test'
+         const formData = new FormData();
+
+         formData.append('email', emailInput.value);
+         formData.append('password', passwordInput.value);
+         formData.append('checkPassword', passwordCheckInput.value);
+         formData.append('nickname', nicknameInput.value);
+
+         const file = imageInput?.files?.[0];
+
+         if (!file) {
+            console.log('프로필 이미지를 선택해주세요.');
+            return;
          }
+
+         formData.append('profileImg', file);
          
          try {
             const response = await apiFetch('/users/new', {
                method: 'POST',
-               body: payload,
+               body: formData,
                withAuth: false
             });
 
@@ -149,6 +170,7 @@ export default class SignUpForm extends Component {
             window.dispatchEvent(new PopStateEvent('popstate'));
          } 
          catch(error) {
+            console.log(error);
             const errorCode = error.payload.code;
             if(errorCode === 'DUPLICATED_USER') {
                email.setState({ isValidInput: false, errorText: '*중복된 이메일입니다.'});
