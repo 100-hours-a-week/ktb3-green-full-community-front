@@ -60,7 +60,7 @@ export async function apiFetch(path, { method = 'GET', headers = {}, body, withA
     data = await response.json(); 
   } 
   catch(error) {
-    throw new Error(`HTTP 응답 JSON 파시 오류: ${error?.message || error}`);
+    throw new Error(`HTTP 응답 JSON 파싱 오류: ${error?.message || error}`);
   }
 
   if (!response.ok) {
