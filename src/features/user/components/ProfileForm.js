@@ -1,7 +1,6 @@
 import { apiFetch, setAuthUser, getAuthUser } from "../../../lib/api.js";
 import Component from "../../../core/Component.js";
 import CustomInput from "../../../shared/components/CustomInput.js";
-import { isValidNickname } from "../../../lib/auth.js";
 import ImageUploader from "../../../shared/components/ImageUploader.js";
 import Withdraw from "./Withdraw.js";
 
