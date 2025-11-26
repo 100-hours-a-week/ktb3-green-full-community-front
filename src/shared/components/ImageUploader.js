@@ -2,7 +2,7 @@ import Component from "../../core/Component.js";
 
 export default class ImageUploader extends Component {
    setup() {
-      this.state = { isUploaded: false, imgUrl: '', text: '+', errorText: '' };
+      this.state = { isUploaded: false, imgUrl: '', text: '추가', errorText: '' };
       this.$refs = {};
    }
 
@@ -14,7 +14,7 @@ export default class ImageUploader extends Component {
 
       const $label = document.createElement('div');
       $label.className = 'image-upload-title';
-      $label.textContent = '프로필 사진'
+      $label.textContent = '프로필 사진*'
 
       const $errorText = document.createElement('div');
       $errorText.className = 'input-error-text';
@@ -24,16 +24,15 @@ export default class ImageUploader extends Component {
       $custom.className = 'custom-image-input';
       if(this.state.isUploaded) $custom.style.backgroundImage = `url(${this.state.imgUrl})`;
 
-      const $customText = document.createElement('div');
-      $customText.className = 'custom-image-input-text';
-      $customText.textContent = this.state.text;
+      const $uploadIcon = document.createElement('div');
+      $uploadIcon.className = this.state.isUploaded ? '' : 'fa-solid fa-file-arrow-up custom-image-upload-icon';
       
       const $input = document.createElement('input');
       $input.type = 'file';
       $input.id = 'image';
       $input.className = 'image-input';
 
-      $custom.append($customText);
+      $custom.append($uploadIcon);
 
       $wrapper.append($label, $errorText, $custom, $input);
       frag.append($wrapper);
@@ -44,6 +43,7 @@ export default class ImageUploader extends Component {
    }
 
    setEvent() {
+      
       const { custom, input } = this.$refs;
 
       custom.addEventListener('click', () => {

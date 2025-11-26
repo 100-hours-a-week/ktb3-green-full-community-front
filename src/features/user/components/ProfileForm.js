@@ -1,7 +1,6 @@
-import { apiFetch } from "../../../lib/api.js";
+import { apiFetch, setAuthUser, getAuthUser } from "../../../lib/api.js";
 import Component from "../../../core/Component.js";
 import CustomInput from "../../../shared/components/CustomInput.js";
-import { isValidNickname } from "../../../lib/auth.js";
 import ImageUploader from "../../../shared/components/ImageUploader.js";
 import Withdraw from "./Withdraw.js";
 
@@ -29,7 +28,7 @@ export default class ProfileForm extends Component {
       $emailWrapper.className = 'profile-edit-email';
 
       const $emailLabel = document.createElement('div');
-      $emailLabel.className = 'label-email';
+      $emailLabel.className = 'email-label form-label';
       $emailLabel.textContent = '이메일';
       const $email = document.createElement('div');
       $email.className = 'current-email';
@@ -40,6 +39,9 @@ export default class ProfileForm extends Component {
       const $nickname = document.createElement('div');
       $nickname.className = 'profile-edit-nickname';
 
+      const $nicknameLabel = document.createElement('div');
+      $nicknameLabel.className = 'nickname-label form-label';
+      $nicknameLabel.textContent = '닉네임';
       const nickname = new CustomInput({ $target: $nickname, label: '닉네임', name: 'nickname', type: 'text', placeholder: '닉네임을 입력하세요', required: false });
       nickname.render();
 
@@ -58,16 +60,16 @@ export default class ProfileForm extends Component {
       $complete.className = 'edit-complete-message';
       $complete.textContent = '수정완료';
 
-      $form.append($image, $emailWrapper, $nickname, $button, $withdraw, $complete);
+      $form.append($image, $emailWrapper, $nicknameLabel, $nickname, $button, $withdraw, $complete);
       frag.append($form);
 
-      this.$refs = { form: $form, nickname: nickname, button: $button, nicknameInput: nickname.$refs.input, complete: $complete };      
+      this.$refs = { form: $form, nickname: nickname, button: $button, nicknameInput: nickname.$refs.input, imageInput: image.$refs.input, complete: $complete };      
 
       return frag;
    }
 
    setEvent() {
-      const { form, nickname, button, nicknameInput, complete } = this.$refs;
+      const { form, nickname, button, nicknameInput, imageInput, complete } = this.$refs;
       const { currentNickname } = this.props;
 
       nicknameInput.addEventListener('input', () => {
@@ -95,16 +97,23 @@ export default class ProfileForm extends Component {
       form.addEventListener('submit', async (e) => {
          e.preventDefault();
 
-         const payload = {
-            nickname: nicknameInput.value
-            //profileImg: 추후 수정 필요!
+         const formData = new FormData();
+         formData.append('nickname', nicknameInput.value);
+
+         const file = imageInput?.files?.[0];
+
+         if (!file) {
+            console.log('프로필 이미지를 선택해주세요.');
+            return;
          }
+
+         formData.append('profileImg', file);
 
          try {
             const response = await apiFetch('/users/profile', {
                method: 'PATCH',
-               body: payload,
-               withAuth: true
+               body: formData,
+               withAuth: true,
             });
 
             console.log(response);
@@ -113,6 +122,11 @@ export default class ProfileForm extends Component {
             setTimeout(() => {
                complete.classList.remove('is-visible');
             }, 2000);
+
+            const authUser = getAuthUser();
+            const updatedImg = URL.createObjectURL(file);
+            setAuthUser({ userId: authUser.userId, profileImg: updatedImg });
+            app.updateHeader(headerState);
          } 
          catch (error) {
             console.log(error);

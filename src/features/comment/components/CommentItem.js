@@ -5,18 +5,48 @@ export default class CommentItem extends Component {
 
    template() {
 
-      const { nickname, content, updatedAt, isOwner } = this.props;
+      const { nickname, profileImg, content, updatedAt, isSame, isOwner } = this.props;
 
+      const [y, m, d] = updatedAt.slice(0, 10).split('-');
+      
       const frag = document.createDocumentFragment();
 
       const $modal = document.createElement('div');
       $modal.className = 'comment-modal';
 
       const $wrapper = document.createElement('div');
-      $wrapper.className = 'comment-wrapper';
+      $wrapper.className = 'comment-item-wrapper';
 
       const $commentWrapper = document.createElement('div');
       $commentWrapper.className = 'comment-info-wrapper';
+
+      const $profile = document.createElement('div');
+      $profile.className = 'comment-profile';
+      $profile.style.backgroundImage = `url("${profileImg}")`;
+
+      const $nicknameAndDate = document.createElement('div');
+      $nicknameAndDate.className = 'comment-nickname-date';
+
+      const $nickname = document.createElement('div');
+      $nickname.className = 'comment-author-nickname';
+      $nickname.classList.toggle('is-same', isSame);
+      $nickname.textContent = nickname;
+      const $date = document.createElement('div');
+      $date.className = 'comment-created-at';
+      $date.textContent = `${y}년 ${Number(m)}월 ${Number(d)}일`;
+      $nicknameAndDate.append($nickname, $date);
+
+      const $actions = document.createElement('div');
+      $actions.className = 'comment-actions';
+      $actions.classList.toggle('is-hidden', !isOwner);
+      const $edit = document.createElement('i');
+      $edit.className = 'fa-solid fa-pen-to-square';
+      const $delete = document.createElement('i');
+      $delete.className = 'fa-solid fa-trash-can';
+      
+      $actions.append($edit, $delete);
+
+      $commentWrapper.append($profile, $nicknameAndDate, $actions);
 
       const $contentWrapper = document.createElement('div');
       $contentWrapper.className = 'comment-content-wrapper';
@@ -26,32 +56,6 @@ export default class CommentItem extends Component {
       $content.textContent = content;
 
       $contentWrapper.append($content);
-
-      const $metaWrapper = document.createElement('div');
-      $metaWrapper.className = 'comment-meta-wrapper';
-
-      const $profileImg = document.createElement('div');
-      $profileImg.className = 'author-profile-img';
-      $profileImg.style.backgroundImage = isOwner ? 'url(/img/profile_img_ham.JPG)' : 'url(/img/profile_img_pms.JPG)'; //추후 수정 필요
-      const $nickname = document.createElement('div');
-      $nickname.className = 'author-profile-nickname';
-      $nickname.textContent = nickname;
-      const $date = document.createElement('div');
-      $date.textContent = updatedAt.replace('T', ' ').replace('Z', '');
-
-      $metaWrapper.append($profileImg, $nickname, $date);
-
-      const $buttons = document.createElement('div');
-      $buttons.className = 'options-button';
-      $buttons.classList.toggle('is-owner', isOwner);
-      const $edit = document.createElement('button');
-      $edit.textContent = '수정';
-      const $delete = document.createElement('button');
-      $delete.textContent = '삭제';
-
-      $buttons.append($edit, $delete);
-
-      $commentWrapper.append($metaWrapper, $buttons);
 
       $wrapper.append($commentWrapper, $contentWrapper);
       frag.append($modal, $wrapper);
@@ -83,7 +87,8 @@ export default class CommentItem extends Component {
 
          new Modal({
             $target: modal,
-            target: '댓글',
+            target: 'comment',
+            message: '댓글을 정말로 삭제하시겠습니까?',
             postId: postId,
             commentId: commentId,
          }).render();
