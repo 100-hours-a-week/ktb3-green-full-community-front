@@ -1,8 +1,6 @@
 import Component from "../../../core/Component.js";
 import { apiFetch, getAuthUser } from "../../../lib/api.js";
-import { getPageState } from "../../../localCache.js";
 import Loading from "../../../shared/components/Loading.js";
-import Modal from "../../../shared/components/Modal.js";
 import Comments from "../../comment/components/Comments.js";
 import PickResult from "../components/PickResult.js";
 import SelectionItem from "../components/SelectionItem.js";
