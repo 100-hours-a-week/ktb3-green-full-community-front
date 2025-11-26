@@ -1,29 +1,158 @@
-.comment-input-wrapper {
-   width: 592px;
-   height: 169px;
-   margin-top: 30px;
+.comment-item {
+   margin: 40px 0px;
+}
 
-   background-color: var(--color-white);
+.comment-item-wrapper {
+   width: 90%;
+   display: flex;
+   flex-direction: column;
+   gap: 10px;
+}
+
+.comment-info-wrapper {
+   width: 100%;
+   height: 50px;
+   display: flex;
+   flex-direction: row;
+   justify-content: flex-start;
+   gap: 20px;
+}
+
+.comment-profile {
+   width: 50px;
+   height: 50px;
+   border-radius: 50px;
+   background-size: cover;          
+   background-position: center;    
+   background-repeat: no-repeat;
+}
+
+.comment-nickname-date {
+   display: flex;
+   flex-direction: column;
+   justify-content: space-around;
+}
+
+.comment-author-nickname {
+   width: fit-content;
+   font-size: 0.9rem;
+   font-weight: 500;
+   padding: 5px 15px;
+   border-radius: 20px;
+   text-align: center;
+   background-color: var(--color-black-light);
+   color: var(--color-white);
+}
+
+.comment-author-nickname.is-same {
+   background-color: var(--color-black-light);
+   color: var(--color-point);
+   border-radius: 20px;
+   text-align: center;
+}
+
+.comment-created-at {
+   font-size: 0.8rem;
+   font-weight: 400;
+   color: var(--color-gray-text);
+}
+
+.comment-actions {
+   display: flex;
+   flex-direction: row;
+   text-align: center;
+   gap: 10px;
+   margin-left: auto;
+}
+
+.comment-actions > i {
+   font-size: 1.1rem;
+   color: var(--color-gray-text);
+}
+
+.comment-actions > i:hover {
+   animation: darker 0.5s forwards;
+}
+
+@keyframes darker {
+  from {
+    color: var(--color-gray-text);
+  }
+  to {
+    color: var(--color-black-light);
+  }
+}
+
+.comment-actions.is-hidden {
+   display: none;
+}
+
+
+.comment-content-wrapper {
+   padding-left: 70px;
+}
+
+.comment-content {
+   font-size: 1rem;
+   font-weight: 400;
+}
+
+
+
+
+.comment-input-form {
+   width: 900px;
+   height: 190px;
+   margin-top: 50px;
+
+   background-color: var(--color-gray-light);
    border-radius: 16px;
 
+   display: flex;
+   flex-direction: column;
 }
 
-.input-wrapper {
-   height: 115px;
-   border-bottom: 1px solid var(--color-gray);
-   padding: 24px;
+.comment-input-wrapper {
+   flex: 2;
+   padding: 25px;
+   padding-bottom: 0px;
 }
 
-.input-wrapper > textarea {
+.comment-input-wrapper > textarea {
+   background-color: var(--color-gray-light);
    border: none;
    outline: none;
+   resize: none;
    width: 100%;
    height: 100%;
+
+   font-size: 0.9rem;
+   font-weight: 600;
 }
 
-.button-wrapper {
-   height: 53px;
-   padding: 0 24px;
+.comment-info {
+   display: flex;
+   flex-direction: row;
+   gap: 10px;
+
+   margin-top: 15px;
+}
+
+.fa-solid.fa-circle-info {
+   font-size: 1rem;
+   color: var(--color-gray-text);
+}
+
+.comment-info-message {
+   font-size: 0.8rem;
+   font-weight: 400;
+   color: var(--color-gray-text);
+}
+
+
+.comment-submit-button-wrapper {
+   flex: 1;
+   padding: 15px 24px;
    display: flex;
    flex-direction: row;
    justify-content: flex-end;
@@ -31,16 +160,16 @@
 }
 
 .comment-submit-button {
-   width: 138px;
-   height: 39px;
+   width: 130px;
+   height: 35px;
    border: none;
-   border-radius: 16px;
+   border-radius: 30px;
 
-   background-color: var(--color-purple-light);
+   background-color: var(--color-black-light);
    color: var(--color-white);
 
-   font-size: 16px;
-   font-weight: 700;
+   font-size: 0.8rem;
+   font-weight: 600;
 }
 
 .post-detail-comment-list {
@@ -49,24 +178,8 @@
    justify-content: center;
    align-items: center;
 
-   margin: 5px 0 50px 0;
+   margin: 30px 0 50px 0;
    gap: 16px;
-}
-
-.comment-wrapper {
-   width: 544px;
-   height: 65px;
-   border-radius: 16px;
-
-   display: flex;
-   flex-direction: column;
-}
-
-.comment-info-wrapper {
-   height: 44px;
-   display: flex;
-   flex-direction: row;
-
 }
 
 .comment-info-wrapper > .post-options-button {
@@ -77,13 +190,4 @@
    display: flex;
    flex-direction: row;
    align-items: center;
-}
-
-.comment-content-wrapper {
-   padding-left: 46px;
-}
-
-.comment-content {
-   font-size: 15px;
-   font-weight: 400;
 }
