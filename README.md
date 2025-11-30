@@ -69,12 +69,14 @@ src
 
 ## 📺 기능 소개
 ### 1. 회원가입 / 로그인
+https://github.com/user-attachments/assets/572f23cf-8183-47f9-8b16-14ecec6692e7
 
 ### 2. 게시글 기능
+https://github.com/user-attachments/assets/c2675a21-15cf-404a-902a-5fabba97fd8f
 
 ### 3. 댓글 기능
+https://github.com/user-attachments/assets/5aae591d-56a0-48d3-95a3-c7c0e8ca9f77
 
-### 4. 사용자 정보 변경 기능
-
-
+### 4. 사용자 기능
+https://github.com/user-attachments/assets/d9c70298-fe01-4a4c-ba79-d8d8ce0a5ade
 
