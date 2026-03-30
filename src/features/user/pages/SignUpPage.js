@@ -1,5 +1,6 @@
 import Component from '../../../core/Component.js';
 import SignUpForm from '../components/SignUpForm.js';
+import Slogan from '../components/Slogan.js';
 
 export default class SignUpPage extends Component {
 
@@ -10,21 +11,16 @@ export default class SignUpPage extends Component {
       const $page = document.createElement('div');
       $page.className = 'signup-page';
 
-      const $title = document.createElement('div');
-      $title.className = 'signup-title';
-      $title.textContent = '회원가입';
+      const $slogan = document.createElement('div');
+      $slogan.className = 'signup-slogan';
+      new Slogan({ $target: $slogan }).render();
 
       const $formWrapper = document.createElement('div');
       $formWrapper.className = 'signup-form-wrapper';
 
       new SignUpForm({ $target: $formWrapper }).render();
-
-      const $login = document.createElement('div');
-      $login.className = 'login-button';
-      $login.textContent = '로그인하러 가기';
-      $login.setAttribute('data-route', '/');
       
-      $page.append($title, $formWrapper, $login);
+      $page.append($slogan, $formWrapper);
       frag.append($page);
       return frag;
    }

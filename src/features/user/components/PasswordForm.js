@@ -15,6 +15,13 @@ export default class PasswordForm extends Component {
       const $form = document.createElement('form');
       $form.className = 'password-edit-form';
 
+      const $passwordLabel = document.createElement('div');
+      $passwordLabel.className = 'password-edit-label form-input-label';
+      $passwordLabel.textContent = '비밀번호*';
+      const $checkLabel = document.createElement('div');
+      $checkLabel.className = 'password-check-label form-input-label';
+      $checkLabel.textContent = '비밀번호 확인*';
+
       const $password = document.createElement('div');
       $password.className = 'password-edit-form-password';
       const $passwordCheck = document.createElement('div');
@@ -36,7 +43,7 @@ export default class PasswordForm extends Component {
       $complete.className = 'edit-complete-message';
       $complete.textContent = '수정완료';
 
-      $form.append($password, $passwordCheck, $button, $complete);
+      $form.append($passwordLabel, $password, $checkLabel, $passwordCheck, $button, $complete);
       frag.append($form);
 
       this.$refs = { form: $form, password: password, passwordCheck: passwordCheck, button: $button, passwordInput: password.$refs.input, passwordCheckInput: passwordCheck.$refs.input, complete: $complete };      

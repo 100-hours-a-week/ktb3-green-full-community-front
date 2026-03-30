@@ -1,3 +1,4 @@
+import Footer from "./shared/components/Footer.js";
 import Header from "./shared/components/Header.js";
 
 export default class App {
@@ -10,14 +11,19 @@ export default class App {
       $headerMount.id = 'app-header';
 
       this.$header = new Header({ $target: $headerMount });
-      this.$header.setState({isLoggedIn: false, isback: false});
+      this.$header.setState({isLoggedIn: false, isback: false, profileImg: '' });
       this.$header.render();
 
       const $mainMount = document.createElement('main');
       $mainMount.id = 'page-content';
       this.$main = $mainMount;
 
-      this.$target.append($headerMount, $mainMount);
+      const $footerMount = document.createElement('footer');
+      $footerMount.id = 'app-footer';
+      this.$footer = new Footer({ $target: $footerMount });
+      this.$footer.render();
+
+      this.$target.append($headerMount, $mainMount, $footerMount);
    }
 
    mount(node) {

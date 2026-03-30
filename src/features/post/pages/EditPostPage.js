@@ -1,11 +1,11 @@
 import Component from "../../../core/Component.js";
-import PostForm from "../components/PostForm.js";
+import HmmForm from "../components/HmmForm.js";
 
 export default class EditPostPage extends Component {
 
    template() {
 
-      const { mode, postId, title, content, image } = this.props;
+      const { mode, postId, title, pick1Title, pick1Detail, pick2Title, pick2Detail } = this.props;
 
       const frag = document.createDocumentFragment();
       
@@ -13,12 +13,12 @@ export default class EditPostPage extends Component {
       $page.className = 'post-edit-page';
 
       const $title = document.createElement('div');
-      $title.className = 'post-edit-title';
-      $title.textContent = '게시글 수정';
+      $title.className = 'post-add-page-title page-title';
+      $title.textContent = 'Hmmm..🤔 내용을 수정 중입니다!';
 
       const $form = document.createElement('div');
       $form.className = 'post-edit-form';
-      const form = new PostForm({ $target: $form, mode: mode, postId: postId, title: title, content: content, image: image });
+      const form = new HmmForm({ $target: $form, mode: mode, postId: postId, title: title, pick1Title: pick1Title, pick1Detail: pick1Detail, pick2Title: pick2Title, pick2Detail: pick2Detail });
       form.render();
       
       $page.append($title, $form);

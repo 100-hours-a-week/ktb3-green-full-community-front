@@ -1,4 +1,5 @@
 import Component from "../../core/Component.js";
+import Modal from "./Modal.js";
 
 export default class DropDownNav extends Component {
 
@@ -10,11 +11,16 @@ export default class DropDownNav extends Component {
 
       const frag = document.createDocumentFragment();
 
+      const $modal = document.createElement('div');
+      $modal.className = 'logout-modal';
+
       const $wrapper = document.createElement('div');
       $wrapper.className = 'drop-nav-wrapper';
       $wrapper.hidden = this.state.hidden;
 
       const $nav = document.createElement('ul');
+      $nav.className = 'drop-nav-menu-list';
+      $nav.classList.toggle('is-visible', !this.state.hidden);
 
       const $profile = document.createElement('li');
       $profile.className = 'go-profile-edit';
@@ -31,9 +37,9 @@ export default class DropDownNav extends Component {
       $nav.append($profile, $password, $logout);
       $wrapper.append($nav);
       
-      frag.append($wrapper);
+      frag.append($modal, $wrapper);
 
-      this.$refs = { profileEdit: $profile, passwordEdit: $password, logout: $logout };
+      this.$refs = { modal: $modal, profileEdit: $profile, passwordEdit: $password, logout: $logout };
 
       return frag;
    }
@@ -43,7 +49,7 @@ export default class DropDownNav extends Component {
    }
 
    setEvent() {
-      const { profileEdit, passwordEdit, logout } = this.$refs;
+      const { modal, profileEdit, passwordEdit, logout } = this.$refs;
 
       profileEdit.addEventListener('click', (e) => {
          window.history.pushState({}, '', '/users/profile/edit');
@@ -56,11 +62,14 @@ export default class DropDownNav extends Component {
       });
 
       logout.addEventListener('click', (e) => {
-         window.history.pushState({}, '', '/');
-         window.dispatchEvent(new PopStateEvent('popstate'));
+
+         new Modal({
+            $target: modal,
+            target: 'logout',
+            message: '로그아웃 하시겠습니까?',
+         }).render();
+
       });
-
-
 
    }
 }

@@ -1,4 +1,4 @@
-import { apiFetch } from "../../../lib/api.js";
+import { apiFetch, getAccessToken, getAuthUser } from "../../../lib/api.js";
 import ProfileForm from "../components/ProfileForm.js";
 import Component from "../../../core/Component.js";
 
@@ -44,7 +44,7 @@ export default class ProfileEditPage extends Component {
             $target: form,
             email: userProfile.email,
             currentNickname: userProfile.nickname,
-            currentProfileImg: '/img/profile_img_ham.JPG', //추후 수정 필요
+            currentProfileImg: getAuthUser().profileImg ?? null,
          }
 
          const profileForm = new ProfileForm(profileEditFormProps);

@@ -1,11 +1,12 @@
 import { apiFetch } from "../../lib/api.js";
 import Component from "../../core/Component.js";
+import { clearPageState } from "../../localCache.js";
 
 export default class Modal extends Component {
 
    template() {
 
-      const { target } = this.props;
+      const { target, message } = this.props;
 
       const frag = document.createDocumentFragment();
 
@@ -17,11 +18,7 @@ export default class Modal extends Component {
 
       const $title = document.createElement('div');
       $title.className = 'modal-title';
-      $title.textContent = `${target}을 삭제하시겠습니까?`;
-
-      const $text = document.createElement('div');
-      $text.className = 'modal-text';
-      $text.textContent = '삭제한 내용은 복구할 수 없습니다.';
+      $title.textContent = message;
 
       const $buttons = document.createElement('div');
       $buttons.className = 'modal-buttons';
@@ -36,7 +33,7 @@ export default class Modal extends Component {
 
       $buttons.append($cancle, $ok);
 
-      $modal.append($title, $text, $buttons);
+      $modal.append($title, $buttons);
 
       $wrapper.append($modal);
 
@@ -54,12 +51,15 @@ export default class Modal extends Component {
       const { wrapper, cancleButton, okButton } = this.$refs;
 
       cancleButton.addEventListener('click', () => {
-         wrapper.remove();
+         wrapper.classList.add('out');
+         wrapper.addEventListener('animationend', () => {
+            wrapper.remove();
+         }, {once: true});
       });   
 
       okButton.addEventListener('click', async () => {
 
-         if (target === '댓글') {
+         if (target === 'comment') {
             const api = `/posts/${postId}/comments/${commentId}`;
             try {
                const response = await apiFetch(api, {
@@ -74,7 +74,7 @@ export default class Modal extends Component {
                console.log(error);
             }
          }
-         else {
+         else if (target === 'post') {
             const api = `/posts/${postId}`;
             try {
                const response = await apiFetch(api, {
@@ -82,12 +82,19 @@ export default class Modal extends Component {
                   withAuth: true
                });
                console.log(response);
+
+               clearPageState();
+
                window.history.pushState({}, '', '/posts');
                window.dispatchEvent(new PopStateEvent('popstate'));
             }
             catch(error) {
                console.log(error);
             }
+         }
+         else if (target === 'logout') {
+            window.history.pushState({}, '', '/');
+            window.dispatchEvent(new PopStateEvent('popstate'));
          }
 
       });

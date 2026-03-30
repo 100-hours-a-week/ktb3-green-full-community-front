@@ -7,7 +7,7 @@ export default class Comments extends Component {
 
    template() {
 
-      const { postId, commentList } = this.props;
+      const { postId, commentList, pickNumber } = this.props;
 
       const frag = document.createDocumentFragment();
 
@@ -20,6 +20,7 @@ export default class Comments extends Component {
       const commentInputProps = {
          $target: $commentInput,
          postId: postId,
+         pickNumber: pickNumber,
       };
 
       const commentInput = new CommentInput(commentInputProps);
@@ -33,11 +34,13 @@ export default class Comments extends Component {
             postId: postId,
             commentId: comment.commentId,
             nickname: comment.author.nickname,
+            profileImg: comment.author.profileImg,
             content: comment.content,
             updatedAt: comment.updatedAt,
+            isSame: comment.pickNumber === pickNumber,
             isOwner: Number(getAuthUser().userId) === Number(comment.author.userId),
          }
-
+         console.log(comment);
          const commentItem = new CommentItem(commentItemProps).render();
          $commentList.appendChild(commentItem);
       })
