@@ -1,0 +1,275 @@
+.login-page, .signup-page {
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+}
+
+.signup-page {
+   width: 100%;
+   display: flex;
+   flex-direction: row;
+}
+
+.signup-slogan {
+   flex: 1;
+   padding: 50px;
+   padding-left: 300px;
+
+   display: flex;
+   flex-direction: column;
+   gap: 30px;
+}
+
+.slogan-greet {
+   font-size: 2rem;
+   font-weight: 700;
+   margin-bottom: 20px;
+}
+
+.slogan-title {
+   font-size: 4rem;
+   font-weight: 800;
+}
+
+.slogan-text-wrapper {
+   display: flex;
+   flex-direction: row;
+   gap: 5px;
+}
+
+.slogan-text {
+   border-radius: 50px;
+   padding: 10px 25px;
+   font-size: 2.5rem;
+   font-weight: 600;
+}
+
+.slogan-text.white-black {
+   background-color: var(--color-black-light);
+   color: var(--color-white);
+}
+
+.slogan-text.mint-black {
+   background-color: var(--color-black-light);
+   color: var(--color-point);
+}
+
+.slogan-text.gray-black {
+   background-color: var(--color-gray);
+   color: var(--color-black-light);
+}
+
+.signup-form-wrapper {
+   flex: 1;
+   padding-right: 300px;
+   display: flex;
+   justify-content: flex-end;
+}
+
+.login-page {
+   align-self: flex-start;
+}
+
+.login-form-wrapper {
+   width: 400px;
+}
+
+.login-title {
+   margin-top: 150px;
+}
+
+.login-title, .signup-title, .password-edit-title, .profile-edit-title {
+   font-size: 1.8rem;
+   font-weight: 700;
+}
+
+.login-form, .signup-form, .password-edit-form, .profile-edit-form {
+   width: 100%;
+   margin-top: 30px;
+
+   display: flex;
+   flex-direction: column;
+   gap: 15px;
+}
+
+.signup-form {
+   width: 400px;
+}
+
+.signup-form-label {
+   font-size: 1rem;
+   font-weight: 600;
+}
+
+.form-label {
+   font-size: 1rem;
+   font-weight: 600;
+}
+
+
+.login-input-wrapper {
+   position: relative;
+   display: flex;
+   align-items: center;
+}
+
+.login-memory-id {
+   display: flex;
+   flex-direction: row;
+   gap: 7px;
+   align-self: flex-start;
+   margin-bottom: 10px;
+}
+
+.login-memory-id > i {
+   font-size: 1.1rem;
+   color: var(--color-gray);
+   text-align: center;
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   line-height: 1;
+}
+
+.login-memory-id > .fa-solid {
+   color: var(--color-black-light);
+}
+
+.login-memory-id-text {
+   font-size: 0.9rem;
+   color: var(--color-black-light);
+}
+
+.profile-edit-form {
+   margin-top: 0px;
+}
+
+.signup-button, .login-button {
+   width: 100%;
+
+   margin-top: 20px;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   text-align: center;
+
+   font-size: 14px;
+}
+
+.signup-button {
+  width: 100%;
+  height: 50px;
+  margin-top: 16px;
+
+  border-radius:30px;   
+  border: none;
+
+  padding: 3px 10px;
+  text-align: center;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-black-light);
+
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-black-light);
+}
+
+.signup-image, .profile-image {
+   width: 100%;
+}
+
+.image-upload-wrapper {
+   display: flex;
+   flex-direction: column;
+   width: 100%;
+}
+
+.password-edit-page, .profile-edit-page {
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+   align-self: flex-start;
+   width: 400px;
+}
+
+.password-edit-title, .profile-edit-title {
+   margin: 80px 0 50px 0;
+}
+
+.edit-complete-message {
+   width: 102px;
+   height: 46px;
+   border-radius: 30px;
+   margin-top: 30px;
+
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   align-self: center;
+
+   background-color: var(--color-black-light);
+   color: var(--color-point);
+   box-shadow:
+      0 1px   3px  rgba(0,0,0,.12), 
+      0 6px  12px rgba(0,0,0,.10), 
+      0 12px 24px rgba(0,0,0,.08);
+
+   opacity: 0;
+   transition: opacity 0.2s ease, transform 0.2s ease;
+
+   font-size: 1rem;
+   font-weight: 600;
+
+}
+
+.edit-complete-message.is-visible {
+   opacity: 1;
+}
+
+.profile-edit-email {
+   width: 355px;
+
+   display: flex;
+   flex-direction: column;
+   gap: 15px;
+}
+
+.label-email {
+   font-size: 15px;
+   font-weight: 600;
+}
+
+.current-email {
+   font-size: 14px;
+   font-weight: 400;
+}
+
+.profile-edit-form .custom-image-input-text {
+   width: 52px;
+   height: 27px;
+   border-radius: 25px;
+   border: 1px solid var(--color-white);
+
+   display: flex;
+   justify-content: center;
+   align-items: center;
+
+}
+
+.profile-edit-form .custom-image-input {
+   color: var(--color-white);
+   font-size: 14px;
+}
+
+.profile-edit-form .custom-image-input-text:empty {
+   display: none;
+}
+
+.withdraw-text {
+   margin-top: 15px;
+   text-align: center;
+   font-size: 15px;
+   font-weight: 400;
+}
