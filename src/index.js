@@ -1,8 +1,8 @@
 import App from './App.js';
-import Router from './router.js';
+import { initRouter } from './router/Router.js';
 
 const $root = document.querySelector('#app'); 
-const app = new App({ $target: $root });     
+const app = new App({ $target: $root });    
 
-const router = Router(app);
+const router = initRouter(app);
 router.render();

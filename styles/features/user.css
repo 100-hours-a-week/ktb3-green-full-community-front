@@ -12,9 +12,7 @@
 }
 
 .signup-slogan {
-   flex: 1;
-   padding: 50px;
-   padding-left: 300px;
+   padding-right: 250px;
 
    display: flex;
    flex-direction: column;
@@ -67,21 +65,19 @@
    justify-content: flex-end;
 }
 
-.login-page {
+.login-page-wrapper {
    align-self: flex-start;
-}
-
-.login-form-wrapper {
    width: 400px;
-}
-
-.login-title {
-   margin-top: 150px;
 }
 
 .login-title, .signup-title, .password-edit-title, .profile-edit-title {
    font-size: 1.8rem;
    font-weight: 700;
+}
+
+.login-title {
+   margin-top: 150px;
+   text-align: center;
 }
 
 .login-form, .signup-form, .password-edit-form, .profile-edit-form {
@@ -194,8 +190,13 @@
    width: 400px;
 }
 
+
 .password-edit-title, .profile-edit-title {
    margin: 80px 0 50px 0;
+}
+
+.password-form-container {
+   width: 100%;
 }
 
 .edit-complete-message {
@@ -236,6 +237,12 @@
    gap: 15px;
 }
 
+.profile-edit-nickname {
+   display: flex;
+   flex-direction: column;
+   gap: 15px;
+}
+
 .label-email {
    font-size: 15px;
    font-weight: 600;
@@ -244,6 +251,10 @@
 .current-email {
    font-size: 14px;
    font-weight: 400;
+}
+
+.profile-form-container {
+   width: 400px;
 }
 
 .profile-edit-form .custom-image-input-text {
@@ -266,6 +277,8 @@
 .profile-edit-form .custom-image-input-text:empty {
    display: none;
 }
+
+
 
 .withdraw-text {
    margin-top: 15px;
