@@ -303,7 +303,7 @@
    background-color: var(--color-purple-light);
 }
 
-.hmm-item {
+.post-item {
    width: 500px;
    height: 230px;
    border-radius: 15px;
@@ -316,7 +316,7 @@
    white-space: pre-line;
 }
 
-.hmm-item-title {
+.post-item-title {
    flex: 1;
    display: flex;
    flex-direction: column;
@@ -324,29 +324,29 @@
    padding: 0 20px;
 }
 
-.hmm-item-title-top, .hmm-item-title-bottom {
+.post-item-title-top, .post-item-title-bottom {
    display: flex;
    flex-direction: row;
    justify-content: space-between;
 }
 
-.hmm-item-title-question {
+.post-item-title-question {
    font-size: 1.5rem;
    font-weight: 700;
    width: 80%;
 }
 
-.hmm-item-title-type {
+.post-item-title-type {
    font-size: 1rem;
    font-weight: 600;
 }
 
-.hmm-item-title-viewing, .hmm-item-title-author {
+.post-item-title-viewing, .post-item-title-author {
    font-size: 0.8rem;
    font-weight: 400;
 }
 
-.hmm-item-picks {
+.post-item-picks {
    flex: 1;
    display: flex;
    flex-direction: row;
@@ -357,7 +357,7 @@
    color: var(--color-white);
 }
 
-.hmm-item-pick {
+.post-item-pick {
    flex: 1;
    font-size: 1.2rem;
    font-weight: 600;
@@ -376,6 +376,11 @@
 
 .selection-page-title.is-hidden {
    display: none;
+}
+
+.selection-form {
+   width: 900px;
+   height: 550px;
 }
 
 .selection-button {
@@ -412,11 +417,17 @@
    flex-direction: column;
 }
 
+.main-format-author {
+   display: flex;
+   flex-direction: row;
+   justify-content: space-between;
+   margin-bottom: 15px;
+}
+
 .main-format-author-info {
    display: flex;
    flex-direction: row;
    gap: 10px;
-   margin-bottom: 15px;
 }
 
 .main-format-profile-img {
@@ -429,8 +440,36 @@
 }
 
 .main-format-author-nickname {
-   font-size: 1rem;
+   font-size: 0.9rem;
    font-weight: 600;
+}
+
+.main-format-author-nickname.same {
+   width: fit-content;
+   font-size: 0.9rem;
+   font-weight: 500;
+   padding: 2px 15px;
+   border-radius: 20px;
+   text-align: center;
+
+   background-color: var(--color-black-light);
+   color: var(--color-point);
+   border-radius: 20px;
+   text-align: center;
+}
+
+.main-format-author-nickname.different {
+   width: fit-content;
+   font-size: 0.9rem;
+   font-weight: 500;
+   padding: 2px 15px;
+   border-radius: 20px;
+   text-align: center;
+
+   background-color: var(--color-black-light);
+   color: var(--color-white);
+   border-radius: 20px;
+   text-align: center;
 }
 
 .main-format-created-at {
@@ -438,6 +477,13 @@
    font-weight: 400;
    color: var(--color-gray-text);
 }
+
+.main-format-created-at.comment {
+   font-size: 0.8rem;
+   font-weight: 400;
+   color: var(--color-gray-text);
+}
+
 
 .main-format-header,.main-format-title {
    width: 100%;
@@ -463,18 +509,38 @@
    border: none;
 }
 
+.main-format-nickname-date {
+   display: flex;
+   flex-direction: column;
+   justify-content: space-between;
+}
+
 .main-format-nickname {
    font-size: 1rem;
    font-weight: 600;
    padding-bottom: 30px;
 }
 
+
+.comment-author {
+   width: fit-content;
+   font-size: 0.9rem;
+   font-weight: 500;
+   padding: 2px 15px;
+   border-radius: 20px;
+   text-align: center;
+   background-color: var(--color-black-light);
+   color: var(--color-white);
+}
+
 .main-format-post-actions {
+   height: 100%;
    margin-left: auto;
    display: flex;
    flex-direction: row;
+   align-items: center;
    text-align: center;
-   gap: 10px;
+   gap: 15px;
 }
 
 .main-format-post-actions.is-hidden {
@@ -500,6 +566,7 @@
 }
 
 .main-format-picks {
+   width: 100%;
    flex: 1;
    display: flex;
    flex-direction: row;
@@ -510,8 +577,19 @@
    color: var(--color-white);
 }
 
+.pick-content-container {
+   flex: 1;
+}
+
+.pick-form-container {
+   flex: 1;
+}
+
 .main-format-pick-wrapper {
    flex: 1;
+   width: 100%;
+   height: 100%;
+
    font-size: 1.2rem;
    font-weight: 600;
    
@@ -600,7 +678,7 @@
    border-left: 0.5px solid var(--color-gray-light);
 }
 
-.hmm-format-help {
+.post-format-help {
    color: var(--color-gray-dark);
    font-size: 0.9rem;
    align-self: flex-end;
@@ -614,7 +692,7 @@
    font-weight: 400;
 }
 
-.hmm-post-form-bottom {
+.post-form-bottom {
    display: flex;
    flex-direction: row;
    justify-content: space-between;
@@ -622,7 +700,7 @@
    margin-top: 20px;
 }
 
-.hmm-submit-button {
+.post-submit-button {
    width: 120px;
    height: 40px;
    background-color: var(--color-white);
@@ -679,6 +757,10 @@
    display: flex;
    flex-direction: row;
    gap: 250px;
+}
+
+.pick-results-wrapper.is-hidden {
+   display: none;
 }
 
 .pick-result-box {
