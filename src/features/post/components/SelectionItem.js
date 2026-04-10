@@ -1,198 +1,110 @@
 import Component from "../../../core/Component.js";
+import h from "../../../core/VdomNode.js";
 import { apiFetch } from "../../../lib/api.js";
+import EditDeleteActions from "../../../shared/components/EditDeleteActions.js";
 import Modal from "../../../shared/components/Modal.js";
+import AuthorInfo from "../../user/components/AuthorInfo.js";
+import PickContent from "./PickContent.js";
 
 export default class SelectionItem extends Component {
 
    setup() {
-      this.state = { isSelected: false, pick1: false, pick2: false };
-   }
 
-   template() {
+      this.state = { isSelected: false, pick1: false, pick2: false, showResults: false };
+      this._bind = false;
 
-      const { postId, authorNickname, authorProfile, title, pick1Title, pick1Detail, pick2Title, pick2Detail, isPicked, isOwner  } = this.props;
-
-      const canPick = !isPicked;
-      const pick1On = canPick && this.state.pick1;
-      const pick2On = canPick && this.state.pick2;
-      
-      const frag = document.createDocumentFragment();
-
-      const $modal = document.createElement('div');
-      $modal.className = 'post-modal';
-
-      const $form = document.createElement('form');
-      $form.className = 'main-format post-view';
-
-      const $post = document.createElement('div');
-      $post.className = 'main-format-post';
-
-      const $profile = document.createElement('div');
-      $profile.className = 'main-format-author-info';
-
-      const $profileImg = document.createElement('div');
-      $profileImg.className = 'main-format-profile-img';
-      $profileImg.style.backgroundImage = `url("${authorProfile}")`;
-
-      const $nicknameAndDate = document.createElement('div');
-      $nicknameAndDate.className = 'main-format-nickname-date';
-
-      const $nickname = document.createElement('div');
-      $nickname.className = 'main-format-author-nickname';
-      $nickname.textContent = authorNickname;
-      const $date = document.createElement('div');
-      $date.className = 'main-format-created-at';
-      $date.textContent = '2025년 11월 21일';
-
-      const $actions = document.createElement('div');
-      $actions.className = 'main-format-post-actions';
-      $actions.classList.toggle('is-hidden', !isOwner);
-      const $edit = document.createElement('i');
-      $edit.className = 'fa-solid fa-pen-to-square';
-      const $delete = document.createElement('i');
-      $delete.className = 'fa-solid fa-trash-can';
-      
-      $actions.append($edit, $delete);
-
-      $nicknameAndDate.append($nickname, $date);
-      $profile.append($profileImg, $nicknameAndDate, $actions);
-
-      const $postHeader = document.createElement('div');
-      $postHeader.className = 'main-format-header post-view';
-
-      const $title = document.createElement('div');
-      $title.className = 'main-format-title post-view';
-      $title.textContent = title;
-
-      $postHeader.append($title);
-
-      const $picks = document.createElement('div');
-      $picks.className = 'main-format-picks post-view';
-
-      const $pick1Wrapper = document.createElement('div');
-      $pick1Wrapper.className = 'main-format-pick-wrapper pick-1';
-      $pick1Wrapper.classList.toggle('is-picked', pick1On);
-      const $pick1Number = document.createElement('div');
-      $pick1Number.className = 'main-format-pick-number';
-      $pick1Number.classList.toggle('is-picked', pick1On);
-      $pick1Number.textContent = 'A';
-      const $pick1 = document.createElement('div');
-      $pick1.className = 'main-format-pick-title'
-      $pick1.classList.toggle('is-picked', pick1On);
-      $pick1.textContent = pick1Title;
-      const $pick1Detail = document.createElement('div');
-      $pick1Detail.className = 'main-format-pick-detail';
-      $pick1Detail.textContent = pick1Detail;
-      $pick1Wrapper.append($pick1Number, $pick1, $pick1Detail);
-
-      const $pick2Wrapper = document.createElement('div');
-      $pick2Wrapper.className = 'main-format-pick-wrapper pick-2';
-      $pick2Wrapper.classList.toggle('is-picked', pick2On);
-      const $pick2Number = document.createElement('div');
-      $pick2Number.className = 'main-format-pick-number';
-      $pick2Number.classList.toggle('is-picked', pick2On);
-      $pick2Number.textContent = 'B';
-      const $pick2 = document.createElement('div');
-      $pick2.className = 'main-format-pick-title';
-      $pick2.classList.toggle('is-picked', pick2On);
-      $pick2.textContent = pick2Title;
-      const $pick2Detail = document.createElement('div');
-      $pick2Detail.className = 'main-format-pick-detail';
-      $pick2Detail.textContent = pick2Detail;
-      $pick2Wrapper.append($pick2Number, $pick2, $pick2Detail);
-
-      const $submitButton = document.createElement('button');
-      $submitButton.className = 'main-format-button selection-button';
-      $submitButton.type = 'submit';
-      $submitButton.textContent = this.state.isSelected ? '선택 완료' : 'Hmmm..';
-      $submitButton.classList.toggle('is-hidden', !canPick);
-      
-      $picks.append($pick1Wrapper, $pick2Wrapper);
-      $post.append($profile, $postHeader, $picks);
-      $form.append($post, $submitButton);
-      frag.append($modal, $form);
-
-      this.$refs = { form: $form, title: $title, pick1Wrapper: $pick1Wrapper, pick1: $pick1, pick2Wrapper: $pick2Wrapper, pick2: $pick2, submitButton: $submitButton, editButton: $edit, deleteButton: $delete, modal: $modal };
-
-      return frag;
-
-   }
-
-   setEvent() {
-
-      const { postId, title, pick1Title, pick1Detail, pick2Title, pick2Detail, isPicked } = this.props;
-      const { form, pick1Wrapper, pick1, pick2Wrapper, pick2, submitButton, editButton, deleteButton, modal } = this.$refs;
-
-      pick1Wrapper.addEventListener('click', (e) => {
+      this._onClick = (e) => {
+         const pick = e.target.closest('.main-format-pick-wrapper');
+         if(!pick || this.props.isPicked) return;
          e.preventDefault();
 
-         if(isPicked) return;
-         this.setState({ isSelected: true, pick1: true, pick2: false });
-      });
+         const pickNumber = pick.classList.contains('pick-1') ? 1 : 2;
+         const isPick1 = pickNumber === 1;
+         const isPick2 = !isPick1;
 
-      pick2Wrapper.addEventListener('click', (e) => {
+         this.setState({ isSelected: true, pick1: isPick1, pick2: isPick2 });
+
+      }
+
+      this._onPick = async (e) => {
+         const button = e.target.closest('.selection-button');
+         if(!button || !this.state.isSelected) return;
          e.preventDefault();
 
-         if(isPicked) return;
-         this.setState({ isSelected: true, pick1: false, pick2: true });
-      });
-
-      form.addEventListener('submit', async(e) => {
-         e.preventDefault();
-
-         if(!this.state.isSelected) return;
          const number = this.state.pick1 ? 1 : 2;
 
-         submitButton.classList.toggle('is-hidden', true);
-
          const payload = {
-            postId: postId,
+            postId: this.props.postId,
             pickNumber: number,
          }
          
          try {
 
-            const response = await apiFetch(`/posts/${postId}/picks`, {
+            const response = await apiFetch(`/posts/${this.props.postId}/picks`, {
                method: 'POST',
                body: payload,
                withAuth: true,
             });
 
             console.log(response);
-
-            form.dispatchEvent(
-               new CustomEvent('post:pick', {
-                  detail: { pickNumber: number },
-                  bubbles: true,
-               })
-            );
+            this.props.showResults(number);
 
          }
          catch(error) {
             console.log(error);
          }
-         
-      });
 
-      editButton.addEventListener('click', (e) => {
-         const editProps = {
-            mode: 'edit',
-            title: title,
-            pick1Title: pick1Title,
-            pick1Detail: pick1Detail,
-            pick2Title: pick2Title,
-            pick2Detail: pick2Detail,
-         }
 
-         window.history.pushState(editProps, '', `/posts/${postId}/edit`);
-         window.dispatchEvent(new PopStateEvent('popstate'));
-         
-      });
+      }
 
-      deleteButton.addEventListener('click', async(e) => {
-         e.preventDefault();
-         new Modal({ $target: modal, target: 'post', postId: postId, message: '게시글을 삭제하시겠습니까?' }).render();
-      });
+   }
+
+   template() {
+
+      const { postId, authorNickname, authorProfile, updatedAt, title, pick1Title, pick1Detail, pick2Title, pick2Detail, isPicked, isOwner, showResults  } = this.props;
+      const [y, m, d] = updatedAt?.slice(0, 10).split('-') ?? [];
+      const formattedDate = y ? `${y}년 ${Number(m)}월 ${Number(d)}일` : '';
+
+      const postState = {
+         postId: postId,
+         title: title,
+         pick1Title: pick1Title,
+         pick1Detail: pick1Detail,
+         pick2Title: pick2Title,
+         pick2Detail: pick2Detail,
+      };
+
+      const selectionItem = h('form', { class: 'main-format post-view'},
+         h('div', { class: 'main-format-post' },
+            h('div', { class: 'main-format-author' },
+               h(AuthorInfo, { componentName: 'author-info', nickname: authorNickname, profileImg: authorProfile, date: formattedDate } ),
+               isOwner ? h(EditDeleteActions, { componentName: 'edit-delete-actions', target: 'post', postId: postId, postState: postState }) : null,
+            ),
+            h('div', { class: 'main-format-header post-view' },
+               h('div', { class: 'main-format-title post-view' }, title),
+             ),
+            h('div', { class: 'main-format-picks post-view' },
+               h(PickContent, { componentName: 'pick-content', number: 1, title: pick1Title, detail: pick1Detail, isPicked: this.state.pick1 }),
+               h(PickContent, { componentName: 'pick-content', number: 2, title: pick2Title, detail: pick2Detail, isPicked: this.state.pick2 }),
+            )
+         ),
+         h('button', { class: `main-format-button selection-button ${!isPicked ? '' : 'is-hidden'}`, type: 'button' }, this.state.isSelected ? '선택 완료' : 'Hmmm..'),
+      );
+
+      return selectionItem;
+
+   }
+
+   setEvent() {
+      
+      if(this._bind) return;
+      this._bind = true;
+
+      const pick = this.$target.querySelector('.main-format-picks');
+      const submitButton = this.$target.querySelector('.selection-button');
+
+      pick.addEventListener('click', this._onClick);
+      submitButton.addEventListener('click', this._onPick);
 
    }
 

@@ -1,98 +1,31 @@
 import Component from "../../../core/Component.js";
-import { isValidPassword } from "../../../lib/auth.js";
+import { isValidPassword } from "../../../lib/validateInput.js";
 import CustomInput from "../../../shared/components/CustomInput.js";
 import { apiFetch } from "../../../lib/api.js";
+import h from "../../../core/VdomNode.js";
 
 export default class PasswordForm extends Component {
    
    setup() {
-      this.state = { isCompleted: false };
-   }
 
-   template() {
-      const frag = document.createDocumentFragment();
+      this.state = { isCompleted: false, isToastMessageOpen: false };
+      this._bind = false;
+      this._toastTimer = null;
 
-      const $form = document.createElement('form');
-      $form.className = 'password-edit-form';
-
-      const $passwordLabel = document.createElement('div');
-      $passwordLabel.className = 'password-edit-label form-input-label';
-      $passwordLabel.textContent = '비밀번호*';
-      const $checkLabel = document.createElement('div');
-      $checkLabel.className = 'password-check-label form-input-label';
-      $checkLabel.textContent = '비밀번호 확인*';
-
-      const $password = document.createElement('div');
-      $password.className = 'password-edit-form-password';
-      const $passwordCheck = document.createElement('div');
-      $passwordCheck.className = 'password-edit-form-check';
-
-      const password = new CustomInput({ $target: $password, label: '비밀번호', name: 'password', type: 'text', placeholder: '비밀번호를 입력하세요', required: true });
-      const passwordCheck = new CustomInput({ $target: $passwordCheck, label: '비밀번호 확인', name: 'passwordCheck', type: 'text', placeholder: '비밀번호를 한번 더 입력하세요', required: true });
-
-      password.render();
-      passwordCheck.render();
-
-      const $button = document.createElement('input');
-      $button.className = 'form-submit-button';
-      $button.type = 'submit';
-      $button.value = '수정하기';
-      $button.disabled = !this.state.isCompleted;
-
-      const $complete = document.createElement('div');
-      $complete.className = 'edit-complete-message';
-      $complete.textContent = '수정완료';
-
-      $form.append($passwordLabel, $password, $checkLabel, $passwordCheck, $button, $complete);
-      frag.append($form);
-
-      this.$refs = { form: $form, password: password, passwordCheck: passwordCheck, button: $button, passwordInput: password.$refs.input, passwordCheckInput: passwordCheck.$refs.input, complete: $complete };      
-
-      return frag;
-   }
-
-   setEvent() {
-      const { form, password, passwordCheck, button, passwordInput, passwordCheckInput, complete } = this.$refs;
-
-      passwordInput.addEventListener('input', () => {
-         const input = passwordInput.value || '';
-         if(!input) {
-            password.setState({ isValidInput: false, errorText: '비밀번호를 입력해주세요.'});
-         }
-         else if (!isValidPassword(input)) {
-            password.setState({ isValidInput: false, errorText: '비밀번호는 8자 이상, 20자 이하이며, 대문자, 소문자, 숫자, 특수문자를 각각 최소 1개 포함해야 합니다.'});
-         }
-         else {
-            password.setState({ isValidInput: true, errorText: ''});
-            if(passwordCheck.state.isValidInput) {
-               button.disabled = false;
-               button.classList.toggle('is-active', true);
-            }
-         }
-      });
-
-      passwordCheckInput.addEventListener('input', () => {
-         const input = passwordCheckInput.value || '';
-         if (!input) {
-            password.setState({ isValidInput: false, errorText: '비밀번호를 한번 더 입력해주세요.'});
-         }
-         else if(!(passwordInput.value === input)) {
-            passwordCheck.setState({ isValidInput: false, errorText: '비밀번호와 다릅니다.' })
-         } 
-         else {
-            passwordCheck.setState({ isValidInput: true, errorText: '' });
-            if(password.state.isValidInput) {
-               button.disabled = false;
-               button.classList.toggle('is-active', true);
-            }
-         }
-      });
-
-      form.addEventListener('submit', async (e) => {
+      this._onSubmit = async (e) => {
+         const form = e.target.closest('.password-edit-form');
+         if(!form) return;
          e.preventDefault();
-         
+
+         const newPassword = form.querySelector('.password-input').value;
+         const passwordCheck = form.querySelector('.password-check-input').value;
+         if(newPassword !== passwordCheck) {
+            console.log('비밀번호가 다름');
+            return;
+         }
+
          const payload = {
-            password: passwordInput.value
+            password: form.querySelector('.password-input').value
          }
 
          try {
@@ -104,19 +37,50 @@ export default class PasswordForm extends Component {
 
             console.log(response);
             
-            complete.classList.add('is-visible');
-            setTimeout(() => {
-               complete.classList.remove('is-visible');
+            this.setState({ isToastMessageOpen: true });
+
+            if (this._toastTimer) clearTimeout(this._toastTimer);
+            this._toastTimer = setTimeout(() => {
+               this.setState({ isToastMessageOpen: false });
+               this._toastTimer = null;
             }, 2000);
             
          } 
          catch(error) {
-            password.setState({ isValidInput: false, errorText: '새 비밀번호는 기존 비밀번호와 달라야 합니다.'});
-            button.disabled = true;
-            button.classList.toggle('is-active', false);
+            //동일한 비밀번호로 수정하는 경우
+            console.log('동일한 비밀번호로는 수정이 불가합니다!');
+            // password.setState({ isValidInput: false, errorText: '새 비밀번호는 기존 비밀번호와 달라야 합니다.'});
+            // button.disabled = true;
+            // button.classList.toggle('is-active', false);
          }
 
-      });
+
+
+      }
+
+   }
+
+   template() {
+
+      const passwordForm = h('form', { class: 'password-edit-form' },
+         h('div', { class: 'password-edit-label form-input-label' }, '비밀번호*'),
+         h(CustomInput, { componentName: 'custom-input', placeholder: '새로운 비밀번호를 입력하세요.', name: 'password', type: 'password', required: true, checkValidation: isValidPassword }),
+         h('div', { class: 'password-check-label form-input-label' }, '비밀번호 확인*'),
+         h(CustomInput, { componentName: 'custom-input', placeholder: '확인을 위해 비밀번호를 한번 더 입력해주세요.', name: 'password-check', type: 'password', required: true, checkValidation: isValidPassword }),
+         h('button', { class: 'form-submit-button', type: 'submit' }, '수정하기'),
+         h('div', { class: `edit-complete-message ${this.state.isToastMessageOpen ? 'is-visible' : ''}` }, '수정완료'),
+      );
+
+      return passwordForm;
+
+   }
+
+   setEvent() {
+
+      if(this._bind) return;
+      this._bind = true;
+
+      this.$target.querySelector('.password-edit-form').addEventListener('submit', this._onSubmit);
 
    }
 

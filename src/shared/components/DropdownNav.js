@@ -1,75 +1,59 @@
 import Component from "../../core/Component.js";
+import h from "../../core/VdomNode.js";
 import Modal from "./Modal.js";
 
 export default class DropDownNav extends Component {
 
    setup() {
-      this.state = { hidden: true };
+
+      this.state = { isLogoutModalOpen: false };
+
+      this._bound = false;
+
+      this._routeEditPage = (e) => {
+         const nav = e.target.closest('li[data-route]');
+         if(!nav) return;
+
+         const path = nav.dataset.route;
+         window.history.pushState({}, '', path);
+         window.dispatchEvent(new PopStateEvent('popstate'));
+      }
+
+      this._openLogoutModal = (e) => {
+         const logout = e.target.closest('.go-logout');
+         if(!logout) return;
+
+         this.setState({ isLogoutModalOpen: !this.state.isLogoutModalOpen });
+      }
+
    }
 
    template() {
 
-      const frag = document.createDocumentFragment();
+      const dropdownNav = h('div', { class: `dropdown-nav ${this.props.isOpen ? 'is-open' : ''}` },
+         h(Modal, { componentName: 'modal', class: 'logout-modal', target: 'logout', message: '로그아웃 하시겠습니까?', isOpen: this.state.isLogoutModalOpen, onCloseDone: () => this.setState({ isLogoutModalOpen: false }) }, ),
+         h('div', { class: 'drop-nav-wrapper' },
+            h('ul', { class: `drop-nav-menu-list ${this.props.isOpen ? 'is-visible' : ''}` }, 
+               h('li', { class: 'go-profile-edit profile', 'data-route': '/users/profile/edit' }, '회원정보수정'),
+               h('li', { class: 'go-password-edit password', 'data-route': '/users/password/edit' }, '비밀번호수정'),
+               h('li', { class: 'go-logout' }, '로그아웃'),
+            )
+         )
+      );
 
-      const $modal = document.createElement('div');
-      $modal.className = 'logout-modal';
+      return dropdownNav;
 
-      const $wrapper = document.createElement('div');
-      $wrapper.className = 'drop-nav-wrapper';
-      $wrapper.hidden = this.state.hidden;
-
-      const $nav = document.createElement('ul');
-      $nav.className = 'drop-nav-menu-list';
-      $nav.classList.toggle('is-visible', !this.state.hidden);
-
-      const $profile = document.createElement('li');
-      $profile.className = 'go-profile-edit';
-      $profile.textContent = '회원정보수정';
-
-      const $password = document.createElement('li');
-      $password.className = 'go-password-edit';
-      $password.textContent = '비밀번호수정';
-
-      const $logout = document.createElement('li');
-      $logout.className = 'go-logout';
-      $logout.textContent = '로그아웃';
-
-      $nav.append($profile, $password, $logout);
-      $wrapper.append($nav);
-      
-      frag.append($modal, $wrapper);
-
-      this.$refs = { modal: $modal, profileEdit: $profile, passwordEdit: $password, logout: $logout };
-
-      return frag;
-   }
-
-   toggle() {  
-      this.setState({ hidden: !this.state.hidden });
    }
 
    setEvent() {
-      const { modal, profileEdit, passwordEdit, logout } = this.$refs;
 
-      profileEdit.addEventListener('click', (e) => {
-         window.history.pushState({}, '', '/users/profile/edit');
-         window.dispatchEvent(new PopStateEvent('popstate'));
-      });
+      if(this._bound) return;
+      this._bound = true;
 
-      passwordEdit.addEventListener('click', (e) => {
-         window.history.pushState({}, '', '/users/password/edit');
-         window.dispatchEvent(new PopStateEvent('popstate'));
-      });
-
-      logout.addEventListener('click', (e) => {
-
-         new Modal({
-            $target: modal,
-            target: 'logout',
-            message: '로그아웃 하시겠습니까?',
-         }).render();
-
-      });
+      this.$target.querySelector('.go-profile-edit').addEventListener('click', this._routeEditPage);
+      this.$target.querySelector('.go-password-edit').addEventListener('click', this._routeEditPage);
+      
+      this.$target.querySelector('.go-logout').addEventListener('click', this._openLogoutModal);
 
    }
 }

@@ -1,44 +1,61 @@
 import Component from "../../../core/Component.js";
+import h from "../../../core/VdomNode.js";
 import { apiFetch } from "../../../lib/api.js";
 import { getPageState, savePageState } from "../../../localCache.js";
-import HmmItem from "../components/HmmItem.js";
+import PostItem from "../components/PostItem.js";
 
 export default class PostListPage extends Component {
 
    setup() {
+
       this.state = { page: 0, size: 4, isLast: false, pages: {}, lastViewedPage: 0, isLoading: false };
       this.observer = null;
-   }
+      this._isLoading = false;
+      this._bind = false;
 
+   }
+ 
    template() {
 
-      const frag = document.createDocumentFragment();
+      const pageNumber = Object.keys(this.state.pages).map(Number).sort((a, b) => a - b);
 
-      const $page = document.createElement('div');
-      $page.className = 'post-list-page';
+      const pageGroups = pageNumber.map((pageIdx) => {
 
-      const $titleWrapper = document.createElement('div');
-      $titleWrapper.className = 'post-list-page-title-wrapper';
+         const posts = this.state.pages[pageIdx] || [];
 
-      const $title = document.createElement('div');
-      $title.className = 'post-list-page-title';
-      $title.textContent = 'H m m m . .';
+         const items = posts.map((post) =>
+            h(PostItem, {
+               componentName: 'post-item',
+               postId: post.postId ?? post.id,
+               userId: post.author.userId,
+               title: post.title,
+               pick1: post.pick1.pickTitle,
+               pick2: post.pick2.pickTitle,
+               pickCount: post.pickCount,
+               nickname: post.author?.nickname ?? "",
+            }));
 
-      $titleWrapper.append($title);
+         return h("div", { class: "post-items-group" }, ...items);
+      });
 
-      const $list = document.createElement('div');
-      $list.className = 'post-list';
+      const postListPage = h('div', { class: 'post-list-page' },
+         h('div', { class: 'post-list-page-title-wrapper' },
+            h('div', { class: 'post-list-page-title' }, 'H m m m . .'),
+         ),
+         h('div', { class: 'post-list' }, 
+            ...pageGroups,
+            h('div', { class: 'post-list-scroll-sentinel' }),
+         ),
+      );
 
-      const $scrollSentinel = document.createElement('div');
-      $scrollSentinel.className = 'post-list-scroll-sentinel';
+      return postListPage;
 
-      $list.append($scrollSentinel);
-      $page.append($titleWrapper, $list);
-      frag.append($page);
+   }
 
-      this.$refs = { list: $list, scrollSentinel: $scrollSentinel };
+   setEvent() {
 
-      return frag;
+      if(this._bind) return;
+      this._bind = true;
 
    }
 
@@ -47,20 +64,15 @@ export default class PostListPage extends Component {
       const key = window.location.pathname;
       const cache = getPageState(key);
 
+      console.log('postlistafterMount');
+
       if(cache) {
 
          console.log('cache hit');
 
-         this.state.page = cache.lastFetchedPage ?? 0;
-         this.state.isLast = !!cache.isLast;
-         this.state.pages = cache.pages;
-         this.state.lastViewdPage = cache.lastViewdPage ?? 0;
+         this.setState({ page: cache.lastFetchedPage, isLast: !!cache.isLast, pages: cache.pages, lastViewedPage: cache.lastViewedPage ?? 0 });
 
-         Object.values(cache.pages).forEach((posts) => {
-            this.renderPosts(posts);
-         });
-
-         const container = this.$refs.list;
+         const container = this.$target.querySelector('.post-list');
          const pageWidth = container.clientWidth;
          const { lastViewedPage } = cache;
 
@@ -82,10 +94,10 @@ export default class PostListPage extends Component {
 
    async loadPostItems() {
 
-      const { page, size, isLast, pages, isLoading } = this.state;
+      const { page, size, isLast } = this.state;
 
-      if(isLoading || isLast ) return;
-      this.state.isLoading = true;
+      if(this._isLoading || isLast ) return;
+      this._isLoading = true;
 
       try {
 
@@ -94,16 +106,10 @@ export default class PostListPage extends Component {
             withAuth: false,
          });
 
-         console.log('[fetch]', { reqPage: page, size, len: response.data.content?.length, last: response.data.last });
-         console.log('API 호출');
-
          const posts = response.data.content;
-         this.renderPosts(posts);
+         const newPages = { ...this.state.pages, [page]: posts };
 
-         const updatedPages = { ...pages, [page]: posts };
-         this.state.pages = updatedPages;
-         this.state.page = page + 1;
-         this.state.isLast = response.data.last;
+         this.setState({ page: page + 1, isLast: response.data.last, pages: newPages });
 
          const key = window.location.pathname;
          const prevCache = getPageState(key) || {};
@@ -112,7 +118,7 @@ export default class PostListPage extends Component {
             isLast: this.state.isLast,
             lastFetchedPage: this.state.page,
             lastViewedPage: prevCache.lastViewedPage ?? this.state.lastViewedPage ?? 0,
-            pages: updatedPages,
+            pages: newPages,
          });
 
       }
@@ -120,21 +126,28 @@ export default class PostListPage extends Component {
          console.log(error);
       }
       finally {
-         this.state.isLoading = false;
+         this._isLoading = false;
+         console.log('finally');
       }
    }
 
    initObserver() {
 
-      const { list, scrollSentinel } = this.$refs;
+      const list = this.$target.querySelector('.post-list');
+      const scrollSentinel = this.$target.querySelector('.post-list-scroll-sentinel');
 
-      if (!scrollSentinel) return;
+      if (!list || !scrollSentinel) return;
 
       const callback = (entries, observer) => {
          entries.forEach((entry) => {
+
+            if (this._isLoading || this.state.isLast) return;
+
             if (entry.isIntersecting) {
                console.log('API 호출 트리거');
                this.loadPostItems();
+               const newSentinel = this.$target.querySelector('.post-list-scroll-sentinel');
+               if (newSentinel && !this.state.isLast) this.observer.observe(newSentinel);
             }
             if (this.state.isLast) {
                observer.unobserve(entry.target);
@@ -149,40 +162,13 @@ export default class PostListPage extends Component {
       }
       
       this.observer = new IntersectionObserver(callback, options);
-      this.observer.observe(this.$refs.scrollSentinel);
-
-   }
-
-   renderPosts(posts) {
-
-      const { list, scrollSentinel } = this.$refs;
-
-      const $postPage = document.createElement('div');
-      $postPage.className = 'post-items-group';
-
-      posts.forEach((post) => {
-         const props = {
-         postId: post.postId,
-         userId: post.author.userId,
-         title: post.title,
-         pick1: post.pick1.pickTitle,
-         pick2: post.pick2.pickTitle,
-         pickCount: post.pickCount,
-         nickname: post.author?.nickname ?? '',
-         };
-
-         const postItem = new HmmItem(props).render();
-         $postPage.appendChild(postItem);
-      });
-
-      list.insertBefore($postPage, scrollSentinel);
+      this.observer.observe(scrollSentinel);
 
    }
 
    initScrollSave() {
 
-      const { list } = this.$refs;
-
+      const list = this.$target.querySelector('.post-list');
       const key = window.location.pathname;
 
       list.addEventListener('scroll', () => {

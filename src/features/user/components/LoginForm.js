@@ -1,104 +1,60 @@
 import Component from '../../../core/Component.js';
 import { apiFetch, setAccessToken, setRefreshToken, setAuthUser } from '../../../lib/api.js';
 import CustomInput from '../../../shared/components/CustomInput.js';
-import { isValidEmail, isValidPassword } from '../../../lib/auth.js';
+import { isValidEmail, isValidPassword } from '../../../lib/validateInput.js';
+import h from '../../../core/VdomNode.js';
+import { getRouter } from '../../../router/Router.js';
 
 export default class LoginForm extends Component {
    
    setup() {
+
       this.state = { isCompleted: false, isChecked: false };
+
+      this._bound = false;
+      
+      this._onToggle = (e) => {
+         const icon = e.target.closest('.login-memory-icon');
+         if(!icon) return;
+
+         this.setState({ isChecked: !this.state.isChecked });
+      }
+
    }
 
    template() {
 
-      const frag = document.createDocumentFragment();
+      const loginForm = h('form', { class: 'login-form' },
+         h(CustomInput, { componentName: 'custom-input', label: '이메일', name: 'email', type: 'email', placeholder: '이메일을 입력하세요.', required: true, checkValidation: isValidEmail }), 
+         h(CustomInput, { componentName: 'custom-input', label: '비밀번호', name: 'password', type: 'password', placeholder: '비밀번호를 입력하세요', required: true, checkValidation: isValidPassword }),
+         h('div', { class: 'login-memory-id'},
+            h('i', { class: `${this.state.isChecked ? 'fa-solid' : 'fa-regular' } fa-square-check login-memory-icon`}, ''),
+            h('div', { class: 'login-memory-id-text'}, '아이디 저장')
+         ),
+         h('button', { class: 'form-submit-button', type: 'submit' }, '로그인')
+      );
 
-      const $form = document.createElement('form');
-      $form.className = 'login-form';
+      return loginForm;
 
-      const $email = document.createElement('div');
-      $email.className = 'login-form-email input';
-      const $password = document.createElement('div');
-      $password.className = 'login-form-password input';
-
-      const email = new CustomInput({ $target: $email, label: '이메일', name: 'email', type: 'email', placeholder: '이메일을 입력하세요.',required: true });
-      const password = new CustomInput({ $target: $password, label: '비밀번호', name: 'password', type: 'password', placeholder: '비밀번호를 입력하세요', required: true });
-
-      email.render();
-      password.render();
-
-      const $memory = document.createElement('div');
-      $memory.className = 'login-memory-id';
-
-      const $checkbox = document.createElement('i');
-      $checkbox.className = 'fa-regular fa-square-check';
-      const $text = document.createElement('div');
-      $text.className = 'login-memory-id-text';
-      $text.textContent = '아이디 저장';
-
-      $memory.append($checkbox, $text);
-
-      const $submit = document.createElement('button');
-      $submit.className = 'form-submit-button';
-      $submit.type = 'submit';
-      $submit.textContent = '로그인'
-      $submit.disabled = !this.state.isCompleted;
-
-      $form.append($email, $password, $memory, $submit);
-      frag.append($form);
-
-      this.$refs = { form: $form, email: email, password: password, submit: $submit, emailInput: email.$refs.input, passwordInput: password.$refs.input, checkbox: $checkbox };
-
-      return frag;
    }
 
    setEvent() {
-      const { form, email, password, submit, emailInput, passwordInput, checkbox } = this.$refs;
 
-      emailInput.addEventListener('input', () => {
-         const input = emailInput.value || '';
-         if (!input || !isValidEmail(input)) {
-            email.setState({ isValidInput: false, errorText: '*올바른 이메일 주소 형식을 입력해주세요. (예: example@example.com)'});
-            console.log('*올바른 이메일 주소 형식을 입력해주세요.');
-            submit.disabled = true;
-            submit.classList.toggle('is-active', false);
-         }
-         else {
-            email.setState({ isValidInput: true, errorText: ''});
-            if(password.state.isValidInput) {
-               submit.disabled = false;
-               submit.classList.toggle('is-active', true);
-            }
-         }
-      });
+      if(this._bound) return;
+      this._bound = true;
 
-      passwordInput.addEventListener('input', () => {
-         const input = passwordInput.value || '';
-         if(!input) {
-            password.setState({ isValidInput: false, errorText: '*비밀번호를 입력해주세요.'});
-            submit.disabled = true;
-            submit.classList.toggle('is-active', false);
-         }
-         else if(!isValidPassword(input)) {
-            password.setState({ isValidInput: false, errorText: '*비밀번호는 8자 이상, 20자 이하이며, 대문자, 소문자, 숫자, 특수문자를 각각 최소 1개 포함해야 합니다.'});
-            submit.disabled = true;
-            submit.classList.toggle('is-active', false);
-         }
-         else {
-            password.setState({ isValidInput: true, errorText: ''});
-            if(email.state.isValidInput) {
-               submit.disabled = false;
-               submit.classList.toggle('is-active', true);
-            }
-         }
-      });
-
-      form.addEventListener('submit', async(e) => {
+      this.$target.querySelector('.login-memory-icon').addEventListener('click', this._onToggle);
+      this.$target.querySelector('.login-form').addEventListener('submit', async(e) => {
+         
          e.preventDefault();
 
+         const form = e.currentTarget;
+         const emailInputValue = form.querySelector('.email-input').value;
+         const passwordInputValue = form.querySelector('.password-input').value;
+
          const payload = {
-            email: emailInput.value,
-            password: passwordInput.value,      
+            email: emailInputValue,
+            password: passwordInputValue,      
          };
 
          try {
@@ -111,21 +67,19 @@ export default class LoginForm extends Component {
             setAccessToken(response.data.accessToken);
             setRefreshToken(response.data.refreshToken);
             setAuthUser({ userId: response.data.userId, profileImg: response.data.profileImg });
+            
+            console.log(response);
 
-            window.history.pushState({}, '', '/posts');
-            window.dispatchEvent(new PopStateEvent('popstate'));
+            getRouter().navigate('/posts');
          } 
          catch (error) {
             if(error.status === 401 || error.status === 404) {
-               password.setState({ isValidInput: false, errorText: '*아이디 또는 비밀번호를 확인해주세요'});
+               console.log('비번 틀리심여~'); //수정 필요
             }
          }
+
       });
 
-      checkbox.addEventListener('click', (e) => {
-         checkbox.classList.toggle('fa-regular');
-         checkbox.classList.toggle('fa-solid');
-      });
 
    }
 }
