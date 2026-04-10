@@ -1,38 +1,27 @@
+import Component from "./core/Component.js";
+import h from "./core/VdomNode.js";
 import Footer from "./shared/components/Footer.js";
 import Header from "./shared/components/Header.js";
 
-export default class App {
+export default class App extends Component {
 
-   constructor({$target}) {
+   setup () {}
 
-      this.$target = $target;
+   template () {
 
-      const $headerMount = document.createElement('header');
-      $headerMount.id = 'app-header';
+      const { params, headerState, contentPage } = this.state;
 
-      this.$header = new Header({ $target: $headerMount });
-      this.$header.setState({isLoggedIn: false, isback: false, profileImg: '' });
-      this.$header.render();
+      const vdom = 
+         h('div', { id: 'content' },
+            h(Header, { componentName: 'header', ...headerState }),
+            h(contentPage, { componentName: 'content-page', params: params }),
+            h(Footer, { componentName: 'footer' })
+         );
+   
+      return vdom;
 
-      const $mainMount = document.createElement('main');
-      $mainMount.id = 'page-content';
-      this.$main = $mainMount;
+  }
 
-      const $footerMount = document.createElement('footer');
-      $footerMount.id = 'app-footer';
-      this.$footer = new Footer({ $target: $footerMount });
-      this.$footer.render();
-
-      this.$target.append($headerMount, $mainMount, $footerMount);
-   }
-
-   mount(node) {
-      this.$main.replaceChildren(node);
-   }
-
-   updateHeader(state) {
-      this.$header.setState(state);
-   }
-
+  setEvent () {}
 
 }

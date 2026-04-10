@@ -1,103 +1,128 @@
-import { apiFetch } from "../../lib/api.js";
+
 import Component from "../../core/Component.js";
+import h from "../../core/VdomNode.js";
+import { apiFetch } from "../../lib/api.js";
 import { clearPageState } from "../../localCache.js";
+import { getRouter } from "../../router/Router.js";
 
 export default class Modal extends Component {
 
+   setup() {
+
+      this.router = getRouter();
+      this._bind = false;
+
+      this._onCancleClick = (e) => {
+         const button = e.target.closest('.modal-cancle-button');
+         if(!button) return;
+         e.preventDefault();
+
+         this.closeWithAnimation();
+      }
+
+      this._onOkClick = async (e) => {
+         const button = e.target.closest('.modal-ok-button');
+         if(!button) return;
+
+         e.preventDefault();
+
+         switch(this.props.target) {
+            case 'post':
+               try {
+                  const response = await apiFetch(`/posts/${this.props.postId}`, {
+                     method: 'DELETE',
+                     withAuth: true
+                  });
+                  console.log(response);
+
+                  clearPageState();
+                  this.router.navigate('/posts');
+               }
+               catch(error) {
+                  console.log(error);
+               }
+               break;
+            case 'comment':
+               try {
+                  const response = await apiFetch(`/posts/${this.props.postId}/comments/${this.props.commentId}`, {
+                     method: 'DELETE',
+                     withAuth: true
+                  });
+                  console.log(response);
+                  this.props.updateComments();
+               }
+               catch(error) {
+                  console.log(error);
+               }
+               break;
+            case 'logout':
+               this.router.navigate('/');
+               break;
+            case 'user':
+               try {
+                  const response = await apiFetch('/users/active', {
+                     method: 'PATCH',
+                     withAuth: true,
+                  });
+
+                  console.log(response);
+                  this.router.navigate('/');
+               }
+               catch(error) {
+                  console.log(error);
+               }
+               break;
+         }
+      }
+   }
+
+   closeWithAnimation() {
+      if (this._closing) return;
+      this._closing = true;
+
+      const wrapper = this.$target.querySelector('.modal-wrapper');
+      if (!wrapper) {
+         this.props.onCloseDone?.();
+         return;
+      }
+
+      wrapper.classList.add('out');
+      wrapper.addEventListener('animationend', () => {
+         this._closing = false;
+         this.props.onCloseDone?.(); 
+      }, { once: true });
+   }
+
    template() {
 
-      const { target, message } = this.props;
+      const { message, isOpen } = this.props;
 
-      const frag = document.createDocumentFragment();
+      const modal = h('div', { class: 'modal-wrapper' },
+         h('div', { class: 'modal' },
+            h('div', { class: 'modal-title' }, message),
+            h('div', { class: 'modal-buttons' },
+               h('button', { class: 'modal-cancle-button', type: 'button' }, '취소'),
+               h('button', { class: 'modal-ok-button', type: 'button' }, '확인'),
+            )
+         )
+      );
 
-      const $wrapper = document.createElement('div');
-      $wrapper.className = 'modal-wrapper';
-
-      const $modal = document.createElement('div');
-      $modal.className = 'modal';
-
-      const $title = document.createElement('div');
-      $title.className = 'modal-title';
-      $title.textContent = message;
-
-      const $buttons = document.createElement('div');
-      $buttons.className = 'modal-buttons';
-
-      const $cancle = document.createElement('button');
-      $cancle.className = 'modal-cancle-button';
-      $cancle.textContent = '취소';
-
-      const $ok = document.createElement('button');
-      $ok.className = 'modal-ok-button';
-      $ok.textContent = '확인';
-
-      $buttons.append($cancle, $ok);
-
-      $modal.append($title, $buttons);
-
-      $wrapper.append($modal);
-
-      frag.append($wrapper);
-
-      this.$refs = { wrapper: $wrapper, cancleButton: $cancle, okButton: $ok};
-
-      return frag;
+      return isOpen ? modal : null;
 
    }
 
    setEvent() {
 
-      const { target, postId, commentId } = this.props;
-      const { wrapper, cancleButton, okButton } = this.$refs;
+      if(this._bind) return;
 
-      cancleButton.addEventListener('click', () => {
-         wrapper.classList.add('out');
-         wrapper.addEventListener('animationend', () => {
-            wrapper.remove();
-         }, {once: true});
-      });   
+      const cancelButton = this.$target.querySelector('.modal-cancle-button');
+      const okButton = this.$target.querySelector('.modal-ok-button');
+      if (!cancelButton || !okButton) return;
 
-      okButton.addEventListener('click', async () => {
+      this._bind = true;
 
-         if (target === 'comment') {
-            const api = `/posts/${postId}/comments/${commentId}`;
-            try {
-               const response = await apiFetch(api, {
-                  method: 'DELETE',
-                  withAuth: true
-               });
-               console.log(response);
-               window.history.pushState({}, '', `/posts/${postId}`);
-               window.dispatchEvent(new PopStateEvent('popstate'));
-            }
-            catch(error) {
-               console.log(error);
-            }
-         }
-         else if (target === 'post') {
-            const api = `/posts/${postId}`;
-            try {
-               const response = await apiFetch(api, {
-                  method: 'DELETE',
-                  withAuth: true
-               });
-               console.log(response);
-
-               clearPageState();
-
-               window.history.pushState({}, '', '/posts');
-               window.dispatchEvent(new PopStateEvent('popstate'));
-            }
-            catch(error) {
-               console.log(error);
-            }
-         }
-         else if (target === 'logout') {
-            window.history.pushState({}, '', '/');
-            window.dispatchEvent(new PopStateEvent('popstate'));
-         }
-
-      });
+      cancelButton.addEventListener('click', this._onCancleClick);
+      okButton.addEventListener('click', this._onOkClick )
       
    }
 

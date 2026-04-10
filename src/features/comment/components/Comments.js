@@ -1,36 +1,29 @@
 import Component from "../../../core/Component.js";
+import h from "../../../core/VdomNode.js";
 import { getAuthUser } from "../../../lib/api.js";
+import Modal from "../../../shared/components/Modal.js";
 import CommentInput from "./CommentInput.js";
 import CommentItem from "./CommentItem.js";
 
 export default class Comments extends Component {
 
+   setup() {
+
+      this.state = { isCommentOpen: false, isModalOpen: false, isEditMode: false, editingCommentId: null, editingContent: '' };
+      this._openQueued = false;
+
+   }
+
    template() {
 
-      const { postId, commentList, pickNumber } = this.props;
+      const { postId, commentList = [], pickNumber, updateComments, isOpen } = this.props;
 
-      const frag = document.createDocumentFragment();
 
-      const $wrapper = document.createElement('div');
-      $wrapper.className = 'post-detail-comment-wrapper';
-
-      const $commentInput = document.createElement('div');
-      $commentInput.className = 'post-detail-comment-input';
-
-      const commentInputProps = {
-         $target: $commentInput,
-         postId: postId,
-         pickNumber: pickNumber,
-      };
-
-      const commentInput = new CommentInput(commentInputProps);
-      commentInput.render();
-
-      const $commentList = document.createElement('div');
-      $commentList.className = 'post-detail-comment-list';
-
-      commentList.forEach((comment) => {
-         const commentItemProps = {
+      const commentItems = commentList.map((comment) => 
+         h(CommentItem, {
+            componentName: 'comment-item',
+            convertToEditMode: ({ commentId, content }) => this.setState({ isEditMode: true, editingCommentId: commentId, editingContent: content }),
+            updateComments: updateComments,
             postId: postId,
             commentId: comment.commentId,
             nickname: comment.author.nickname,
@@ -39,27 +32,35 @@ export default class Comments extends Component {
             updatedAt: comment.updatedAt,
             isSame: comment.pickNumber === pickNumber,
             isOwner: Number(getAuthUser().userId) === Number(comment.author.userId),
-         }
-         console.log(comment);
-         const commentItem = new CommentItem(commentItemProps).render();
-         $commentList.appendChild(commentItem);
-      })
+         })
+      );
 
-      $wrapper.append($commentInput, $commentList);
-      frag.append($wrapper);
+      const comments = h('div', { class: 'post-detail-comment-wrapper' },
+         h(CommentInput, { componentName: 'commnet-input', class: 'post-detail-comment-input', postId: postId, pickNumber: pickNumber, mode: this.state.isEditMode ? 'edit' : 'create', commentId: this.state.editingCommentId, content: this.state.editingContent, updateComments: updateComments }),
+         h('div', { class: 'post-detail-comment-list' }, ...commentItems),
+      );
 
-      this.$refs = { commentList: $commentList, commentInput: commentInput };
+      return (isOpen && this.state.isCommentOpen ) ? comments: null;
 
-      return frag;
    }
 
    setEvent() {
-      const { commentList, commentInput } = this.$refs;
+      const { isOpen, isDelay } = this.props;
+      if (!isOpen || this.state.isCommentOpen || this._openQueued) return;
 
-      commentList.addEventListener('comment:edit', (e) => {
-         const { id, content } = e.detail;
-         console.log(content);
-         commentInput.editMode({ id, content });
-      });
+      this._openQueued = true;
+
+      const openComments = () => {
+         this._openQueued = false;
+         if (!this.props.isOpen || this.state.isCommentOpen) return;
+         this.setState({ isCommentOpen: true });
+      };
+
+      if (isDelay) {
+         setTimeout(openComments, 1500);
+         return;
+      }
+
+      openComments();
    }
 }

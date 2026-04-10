@@ -1,60 +1,33 @@
 import Component from "../../core/Component.js";
+import h from "../../core/VdomNode.js";
 
 export default class ImageUploader extends Component {
+
    setup() {
-      this.state = { isUploaded: false, imgUrl: '', text: '추가', errorText: '' };
-      this.$refs = {};
-   }
 
-   template() {
-      const frag = document.createDocumentFragment();
+      this.state = { isUploaded: this.props.isUploaded, imgUrl: this.props?.imgUrl ?? '', text: this.props?.text ?? '추가', errorText: '' };
+      this._bind = false;
+      this._objectUrl = null;
 
-      const $wrapper = document.createElement('div');
-      $wrapper.className = 'image-upload-wrapper';
+      this._onClick = (e) => {
+         const image = e.target.closest('.custom-image-input');
+         if(!image) return;
+         e.preventDefault();
 
-      const $label = document.createElement('div');
-      $label.className = 'image-upload-title';
-      $label.textContent = '프로필 사진*'
+         const imageInput = this.$target.querySelector('.image-input');
+         imageInput.value = '';
+         imageInput.click();
 
-      const $errorText = document.createElement('div');
-      $errorText.className = 'input-error-text';
-      $errorText.textContent = this.state.errorText;
-
-      const $custom = document.createElement('div');
-      $custom.className = 'custom-image-input';
-      if(this.state.isUploaded) $custom.style.backgroundImage = `url(${this.state.imgUrl})`;
-
-      const $uploadIcon = document.createElement('div');
-      $uploadIcon.className = this.state.isUploaded ? '' : 'fa-solid fa-file-arrow-up custom-image-upload-icon';
-      
-      const $input = document.createElement('input');
-      $input.type = 'file';
-      $input.id = 'image';
-      $input.className = 'image-input';
-
-      $custom.append($uploadIcon);
-
-      $wrapper.append($label, $errorText, $custom, $input);
-      frag.append($wrapper);
-
-      this.$refs = { custom: $custom, input: $input };
-
-      return frag;
-   }
-
-   setEvent() {
-      
-      const { custom, input } = this.$refs;
-
-      custom.addEventListener('click', () => {
          this.setState({ isUploaded: false, imgUrl: '', text: '+', errorText: '*프로필 사진을 추가해주세요.' });
 
-         input.value = '';
-         input.click();
-      });
+      }
 
-      input.addEventListener('change', () => {
-         const file = input.files?.[0];
+      this._uploadImg = (e) => {
+         const imageInput = e.target.closest('.image-input');
+         if(!imageInput) return;
+         e.preventDefault();
+
+         const file = imageInput.files?.[0];
          if(!file) {
             this.setState({ isUploaded: false, imgUrl: '', text: '+' });
          }
@@ -64,6 +37,31 @@ export default class ImageUploader extends Component {
             this.setState({ isUploaded: true, imgUrl: url, text: '', errorText: '' });
          }
 
-      });
+      }
+   }
+
+   template() {
+
+      const imageUploader = h('div', { class: 'image-upload-wrapper' },
+         h('div', { class: 'image-upload-title' }, '프로필 사진*'),
+         h('div', { class: 'input-error-text'}, this.state.errorText),
+         h('div', { class: 'custom-image-input', style: this.state.isUploaded ? `background-image: url("${this.state.imgUrl}")` : "" },
+            h('i', { class: this.state.isUploaded ? '' : 'fa-solid fa-file-arrow-up custom-image-upload-icon' }),
+         ),
+         h('input', { class: 'image-input', type: 'file', id: 'image'})
+      );
+
+      return imageUploader;
+
+   }
+
+   setEvent() {
+      
+      if(this._bind) return;
+      this._bind = true;
+
+      this.$target.querySelector('.custom-image-input').addEventListener('click', this._onClick);
+      this.$target.querySelector('.image-input').addEventListener('change', this._uploadImg);
+
    }
 }

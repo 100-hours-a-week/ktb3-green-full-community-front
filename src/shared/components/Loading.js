@@ -1,30 +1,32 @@
 import Component from "../../core/Component.js";
+import h from "../../core/VdomNode.js";
 
 export default class Loading extends Component {
 
+   setup() {
+      this.state = { isModalOpen: true };
+   }
+
    template() {
 
-      const frag = document.createDocumentFragment();
+      const { isOpen } = this.props;
 
-      const $wrapper = document.createElement('div');
-      $wrapper.className = 'modal-wrapper';
+      const loadingModal = h('div', { class: `modal-wrapper ${this.state.isModalOpen ? '' : 'out'}` },
+         h('div', { class: 'modal modal-loading' },
+            h('div', { class: 'modal-loading-spinner' }),
+            h('i', { class: 'fa-solid fa-check-to-slot modal-loading-icon'}),
+         ),
+      );
 
-      const $loading = document.createElement('div');
-      $loading.className = 'modal modal-loading';
+      return isOpen ? loadingModal : null;
 
-      const $spinner = document.createElement('div');
-      $spinner.className = 'modal-loading-spinner';
+   }
 
-      const $voteIcon = document.createElement('i');
-      $voteIcon.className = 'fa-solid fa-check-to-slot modal-loading-icon';
+   async afterMount() {
 
-      $loading.append($spinner, $voteIcon);
-      $wrapper.append($loading);
-      frag.append($wrapper);
-
-      this.$refs = { wrapper: $wrapper };
-
-      return frag;
+      const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+      await sleep(1500);
+      this.setState({ isModalOpen: false });
 
    }
 

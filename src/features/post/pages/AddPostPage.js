@@ -1,28 +1,18 @@
 import Component from "../../../core/Component.js";
-import HmmForm from "../components/HmmForm.js";
+import h from "../../../core/VdomNode.js";
+import PostForm from "../components/PostForm.js";
+import HmmForm from "../components/PostForm.js";
 
 export default class AddPostPage extends Component {
    
    template() {
-      
-      const frag = document.createDocumentFragment();
 
-      const $page = document.createElement('div');
-      $page.className = 'post-add-page';
+      const addPostPage = h('div', { class: 'post-add-page' },
+         h('div', { class: 'post-add-page-title page-title' }, 'Hmmm..🤔 어떤 둘 중 하나가 고민되시나요?'),
+         h(PostForm, { componentName: 'post-form', mode: 'create' }),
+      );
 
-      const $title = document.createElement('div');
-      $title.className = 'post-add-page-title page-title';
-      $title.textContent = 'Hmmm..🤔 어떤 둘 중 하나가 고민되시나요?';
-
-      const $form = document.createElement('div');
-      $form.className = 'hmm-add-form';
-      const form = new HmmForm({ $target: $form });
-      form.render();
-
-      $page.append($title, $form);
-      frag.append($page);
-
-      return frag;
+      return addPostPage;
 
    }
 }

@@ -1,25 +1,17 @@
 import PasswordForm from "../components/PasswordForm.js";
 import Component from "../../../core/Component.js";
+import h from "../../../core/VdomNode.js";
 
 export default class PasswordEditPage extends Component {
 
    template() {
 
-      const frag = document.createDocumentFragment();
+      const passwordEditPage = h('div', { class: 'password-edit-page' },
+         h('div', { class: 'password-edit-title' }, '비밀번호 수정'),
+         h(PasswordForm, { componentName: 'password-form' }),
+      );
 
-      const $page = document.createElement('div');
-      $page.className = 'password-edit-page';
-
-      const $title = document.createElement('div');
-      $title.className = 'password-edit-title';
-      $title.textContent = '비밀번호 수정'
-
-      const $form = new PasswordForm().render();
-
-      $page.append($title, $form);
-      frag.append($page);
-
-      return frag;
+      return passwordEditPage;
 
    }
 

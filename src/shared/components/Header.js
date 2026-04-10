@@ -1,74 +1,79 @@
 import Component from '../../core/Component.js';
+import h from '../../core/VdomNode.js';
+import { getRouter } from '../../router/Router.js';
 import DropDownNav from './DropdownNav.js';
 
 export default class Header extends Component {
 
    setup() {
-      this.state = { 
-         isLoggedIn: true,
-         profileImg: null,
-      };
+
+      this.state = { isLoggedIn: true, profileImg: null, isOpen: false };
+      this.router = getRouter();
+      this._bound = false;
+
+      this._routeHome = (e) => {
+         const logo = e.target.closest('.header-logo');
+         if(!logo) return;
+
+         this.router.navigate('/posts');
+      }
+
+      this._routeAddPostPage = (e) => {
+         const addButton = e.target.closest('.header-add-post-button');
+         if(!addButton) return;
+
+         this.router.navigate('/posts/new');
+      }
+
+      this._openModal = (e) => {
+         const profile = e.target.closest('.header-profile-img');
+         if(!profile) return;
+
+         this.setState({ isOpen: !this.state.isOpen });
+      }
+
    }
 
    template() {
-      const frag = document.createDocumentFragment();
-      const { isLoggedIn, profileImg } = this.state;
 
-      const $header = document.createElement('header');
-      $header.className = 'header';
+      const { isAuthenticated, profileImg } = this.props;
 
-      const $logo = document.createElement('div');
-      $logo.className = 'header-logo';
-      const $options = document.createElement('div');
-      $options.className = 'header-options';
+      const header = h('header', { class: 'header' },
+         h('div', { class: 'header-logo' }, ''),
+         isAuthenticated ? (h('div', { class: 'header-options'}, 
+            h('button', { class: 'header-add-post-button'}, '흠.. 주제 작성하기'),
+               h('div', { class: 'header-profile-img', style: `background-image: url("${profileImg}")` }),
+               h(DropDownNav, { componentName: 'dropdown', isOpen: this.state.isOpen }),
+            )) : null,
+         );
 
-      const $addPostButton = document.createElement('button');
-      $addPostButton.className = 'header-add-post-button';
-      $addPostButton.textContent = '흠.. 주제 추가하기';
-      $addPostButton.style.display = isLoggedIn ? 'block' : 'none';
+      return header;
 
-      const $profile = document.createElement('div');
-      $profile.className = 'header-profile-menu';
-
-      const $dropdown = document.createElement('div');
-      $dropdown.className = 'dropdown-nav';
-      const dropdown = new DropDownNav({ $target: $dropdown });
-      dropdown.render();
-
-      const $profileImg = document.createElement('div');
-      $profileImg.className = 'header-profile-img';
-      $profileImg.style.backgroundImage = isLoggedIn ? `url("${profileImg}")` : '';
-      
-      $profile.append($profileImg, $dropdown);
-      $options.append($addPostButton, $profile);
-
-      $header.append($logo, $options);
-      frag.appendChild($header);
-
-      this.$refs = { logo: $logo, addPostButton: $addPostButton, profile: $profileImg, dropdown: dropdown };
-
-      return frag;
    }
 
    setEvent() {
 
-      const { logo, addPostButton, profile, dropdown } = this.$refs;
+      if(this._bound) return;
+      this._bound = true;
 
-      logo.addEventListener('click', (e) => {
-         window.history.pushState({}, '', '/posts');
-         window.dispatchEvent(new PopStateEvent('popstate'));
-      });
+      const { isAuthenticated } = this.props;
 
-      addPostButton.addEventListener('click', (e) => {
-         e.preventDefault();
+      this.$target.querySelector('.header-logo').addEventListener('click', this._routeHome);
+      if(isAuthenticated) {
+         this.$target.querySelector('.header-add-post-button').addEventListener('click', this._routeAddPostPage);
+         this.$target.querySelector('.header-profile-img').addEventListener('click', this._openModal);
+      }
 
-         window.history.pushState({}, '', '/posts/new');
-         window.dispatchEvent(new PopStateEvent('popstate'));
-      });
+      // addPostButton.addEventListener('click', (e) => {
+      //    e.preventDefault();
 
-      profile.addEventListener('click', (e) => {
-         dropdown.toggle();
-      });
+      //    window.history.pushState({}, '', '/posts/new');
+      //    window.dispatchEvent(new PopStateEvent('popstate'));
+      // });
+
+      // profile.addEventListener('click', (e) => {
+      //    dropdown.toggle();
+      // });
 
    }
 

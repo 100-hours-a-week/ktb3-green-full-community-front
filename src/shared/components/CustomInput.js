@@ -1,73 +1,61 @@
 import Component from "../../core/Component.js";
+import h from "../../core/VdomNode.js";
 
 export default class CustomInput extends Component {
 
    setup() {
-      this.state = { isValidInput: false, errorText: '' };
+
+      this.state = { hide: true, isValidInput: false, errorText: '' };
+
+      this._bound = false;
+      this._type = this.props.type;
+
+      this._onToggle = (e) => {
+         const icon = e.target.closest('.hide-icon');
+         if (!icon) return;
+
+         this.props = { ...this.props, type: this.props.type === 'password' ? 'text' : 'password'};
+         this.setState({ hide: !this.state.hide });
+      };
+
+      this._isValid = (e) => {
+         const input = e.target.closest('input');
+         if(!input) return;
+
+         const { isValid, errorText } = this.props.checkValidation(input.value);
+         if(isValid) { this.setState({ errorText: '' }); }
+         else { this.setState({ errorText: errorText }); }
+      }
+
    }
 
    template() {
 
-      const { label, name, type, required } = this.props;
+      const { placeholder, name, type, required } = this.props;
+      const isPwInput = this._type === 'password';
 
-      const frag = document.createDocumentFragment();
+      const formInput = h('div', { class: 'common-input-format' },
+         h('div', { class: 'common-input-field'}, 
+            h('input', { class: `${name}-input`, type: type, placeholder: placeholder, id: name, required: `${required}`}),
+            isPwInput ? h('i', { class: `fa-solid ${this.state.hide ? 'fa-eye-slash' : 'fa-eye'} hide-icon` }) : null,
+         ),
+         h('div', { class: 'input-error-text' }, this.state.errorText)
+      );
 
-      const $wrapper = document.createElement('div');
-      $wrapper.className = 'common-input-format';
+      return formInput;
 
-      const $inputWrapper = document.createElement('div');
-      $inputWrapper.className = 'common-input-field';
-
-      const $input = document.createElement('input');
-      $input.type = type;
-      $input.placeholder = label
-      $input.id = name;
-      if (required) $input.required = true;
-
-      const $hideIcon = document.createElement('i');
-      $hideIcon.className = 'fa-solid fa-eye-slash hide-icon';
-      $hideIcon.classList.toggle('is-password', type === 'password');
-
-      $inputWrapper.append($input, $hideIcon);
-
-      const $errorText = document.createElement('div');
-      $errorText.className = 'input-error-text';
-      $errorText.textContent = this.state.errorText;
-
-      $wrapper.append($inputWrapper, $errorText);
-      frag.append($wrapper);
-
-      this.$refs = { input: $input, hideIcon: $hideIcon, errorText: $errorText };
-
-      return frag;
-   }
-
-   setState(patch) {
-
-      this.state = {...this.state, ...patch};
-
-      if(this.$refs.errorText) {
-         this.$refs.errorText.textContent = this.state.errorText || '';
-         this.$refs.errorText.hidden = !this.state.errorText;
-      }
-      
-      if(this.$refs.input) {
-         this.$refs.input.setAttribute('aria-invalid', String(!this.state.isValidInput));
-      }
    }
 
    setEvent() {
 
-      const { input, hideIcon } = this.$refs;
+      if(this._bound) return;
+      this._bound = true;
 
-      hideIcon.addEventListener('click', (e) => {
+      if(this.$target.querySelector('.hide-icon')) {
+         this.$target.querySelector('.hide-icon').addEventListener('click', this._onToggle);
+      }
 
-         const isHidden = input.type === 'password';
-         input.type = isHidden ? 'text' : 'password';
-
-         hideIcon.classList.toggle('fa-eye');
-         hideIcon.classList.toggle('fa-eye-slash');
-      });
-
+      this.$target.querySelector('input').addEventListener('input', this._isValid);
+   
    }
 }

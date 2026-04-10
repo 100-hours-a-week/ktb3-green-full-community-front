@@ -1,34 +1,26 @@
 import { apiFetch, getAccessToken, getAuthUser } from "../../../lib/api.js";
 import ProfileForm from "../components/ProfileForm.js";
 import Component from "../../../core/Component.js";
+import h from "../../../core/VdomNode.js";
 
 export default class ProfileEditPage extends Component {
 
+   setup() {
+      this.state = { profileEditFromProps: {} };
+   }
+
    template() {
 
-      const frag = document.createDocumentFragment();
+      const profileEditPage = h('div', { class: 'profile-edit-page' },
+         h('div', { class: 'profile-edit-title' }, '회원정보수정'),
+         h(ProfileForm, { componentName: 'profile-form', ...this.state.profileEditFormProps }),
+      );
 
-      const $page = document.createElement('div');
-      $page.className = 'profile-edit-page';
+      return profileEditPage;
 
-      const $title = document.createElement('div');
-      $title.className = 'profile-edit-title';
-      $title.textContent = '회원정보수정'
-
-      const $form = document.createElement('div');
-      $form.className = 'profile-edit-form';
-
-      $page.append($title, $form);
-      frag.append($page);
-
-      this.$refs = { form: $form };
-
-      return frag;
    }
 
    async afterMount() {
-
-      const { form } = this.$refs;
 
       try {
          const response = await apiFetch('/users/profile', {
@@ -36,24 +28,26 @@ export default class ProfileEditPage extends Component {
             withAuth: true,
          })
 
-         console.log(response);
+         console.log('사용자 정보 조회:', response);
 
          const userProfile = response.data;
 
          const profileEditFormProps = {
-            $target: form,
             email: userProfile.email,
             currentNickname: userProfile.nickname,
             currentProfileImg: getAuthUser().profileImg ?? null,
          }
 
-         const profileForm = new ProfileForm(profileEditFormProps);
-         profileForm.setState({ isUploaded: true, isCompleted: false });
+         this.setState({ profileEditFormProps: profileEditFormProps });
+
+         // const profileForm = new ProfileForm(profileEditFormProps);
+         // profileForm.setState({ isUploaded: true, isCompleted: false });
 
       }
       catch(error) {
          console.log(error);
       }
+
    }
 
 
