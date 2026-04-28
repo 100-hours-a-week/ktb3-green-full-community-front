@@ -1,15 +1,14 @@
-import Component from "./Component.js";
 import { TEXT_ELEMENT, isDomNode, isVNode } from "./VdomNode.js";
 
 const RESERVED_PROPS = new Set(["componentName", "children"]);
 const BOOLEAN_PROPS = new Set(["checked", "selected", "disabled"]);
 
+export function isComponentType(type) {
+   return typeof type === "function" && typeof type.prototype?.template === "function";
+}
+
 function isComponentVNode(node) {
-   return (
-      isVNode(node) &&
-      typeof node.type === "function" &&
-      node.type.prototype instanceof Component
-   );
+   return isVNode(node) && isComponentType(node.type);
 }
 
 function setDomProperty(target, attributeName, value) {
@@ -55,14 +54,27 @@ export function updateAttributes(target, oldProps = {}, newProps = {}) {
    }
 }
 
-function mountComponent(node) {
+export function createComponentMountPoint(props = {}) {
    const mountPoint = document.createElement("div");
-   const componentName = node.props?.componentName;
+   const componentName = props?.componentName;
 
    if (componentName) {
       mountPoint.className = `${componentName}-container`;
    }
 
+   return mountPoint;
+}
+
+export function updateComponentMountPoint(mountPoint, oldProps = {}, newProps = {}) {
+   const previousClassName = oldProps?.componentName ? `${oldProps.componentName}-container` : "";
+   const nextClassName = newProps?.componentName ? `${newProps.componentName}-container` : "";
+
+   if (previousClassName === nextClassName) return;
+   mountPoint.className = nextClassName;
+}
+
+function mountComponent(node) {
+   const mountPoint = createComponentMountPoint(node.props);
    const instance = new node.type({
       $target: mountPoint,
       ...node.props,
@@ -75,7 +87,7 @@ function mountComponent(node) {
    return mountPoint;
 }
 
-function createDomNode(node) {
+export function createDomNodeFromVNode(node) {
    if (node.type === TEXT_ELEMENT) {
       return document.createTextNode(node.props?.nodeValue ?? "");
    }
@@ -102,7 +114,7 @@ export default function createElement(node) {
       return mountComponent(node);
    }
 
-   const target = createDomNode(node);
+   const target = createDomNodeFromVNode(node);
    if (node.type === TEXT_ELEMENT) {
       return target;
    }

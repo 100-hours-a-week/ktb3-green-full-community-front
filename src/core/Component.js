@@ -1,5 +1,5 @@
 import createElement from "./CreateElement.js";
-import Diff, { unmountDomTree } from "./DiffAndRerender.js";
+import { clearRoot, scheduleUpdate, unmountDomTree } from "./FiberRenderer.js";
 import { isDomNode, normalizeNode } from "./VdomNode.js";
 
 export default class Component {
@@ -34,18 +34,18 @@ export default class Component {
 
       this.oldVdom = newVdom;
 
-      if(!oldVdom || isDomNode(oldVdom) || isDomNode(newVdom)) {
+      if (isDomNode(oldVdom) || isDomNode(newVdom)) {
          if (oldVdom) {
             this.unmountChildren();
          }
 
+         clearRoot(this.$target);
          this.$target.replaceChildren(createElement(newVdom));
          this.runPostRender();
          return;
       }
 
-      Diff(this.$target, oldVdom, newVdom, 0);
-      this.runPostRender();
+      scheduleUpdate(this, newVdom);
    }
 
    runPostRender() {
@@ -116,6 +116,7 @@ export default class Component {
       this.$refs = {};
       this.oldVdom = null;
       this._mounted = false;
+      clearRoot(this.$target);
    }
 
    useEffect(setup, dependencies = []) {
