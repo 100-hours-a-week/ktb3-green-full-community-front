@@ -1,5 +1,5 @@
-import Component from "./Component.js";
 import createElement, { updateAttributes } from "./CreateElement.js";
+import { unmountDomTree } from "./FiberRenderer.js";
 import { TEXT_ELEMENT, isDomNode, isVNode } from "./VdomNode.js";
 
 const isNil = (value) => value === null || value === undefined;
@@ -8,25 +8,12 @@ function isComponentVNode(node) {
    return (
       isVNode(node) &&
       typeof node.type === "function" &&
-      node.type.prototype instanceof Component
+      typeof node.type.prototype?.template === "function"
    );
 }
 
 function isTextVNode(node) {
    return isVNode(node) && node.type === TEXT_ELEMENT;
-}
-
-export function unmountDomTree(node) {
-   if (!node || isDomNode(node) === false) return;
-
-   Array.from(node.childNodes || []).forEach((childNode) => {
-      unmountDomTree(childNode);
-   });
-
-   const instance = node.__component__;
-   if (!instance || typeof instance.unmount !== "function") return;
-
-   instance.unmount({ skipChildren: true });
 }
 
 function replaceNode(parent, newNode, index) {
